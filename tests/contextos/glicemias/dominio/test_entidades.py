@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 from freezegun import freeze_time
 
-from contextos.glicemias.dominio.entidades.glicemias import (
+from contextos.glicemias.dominio.entidades import (
     Glicemia,
     Auditoria,
     ValorDeGlicemiaInvalido,
@@ -12,7 +12,7 @@ from contextos.glicemias.dominio.entidades.glicemias import (
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_criar_nova_glicemia():
+def test_criar_glicemia():
     id_usuario = uuid4()
 
     hora_atual = datetime.now()
@@ -20,8 +20,8 @@ def test_criar_nova_glicemia():
 
     glicemia_esperada = Glicemia(
         valor=120,
-        jejum=True,
-        data=hora_glicemia,
+        primeira_do_dia=True,
+        horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
         auditoria=Auditoria(
             criado_por=id_usuario,
@@ -33,10 +33,10 @@ def test_criar_nova_glicemia():
         ),
     )
 
-    glicemia_criada = Glicemia.criar_nova(
+    glicemia_criada = Glicemia.criar(
         valor=120,
-        jejum=True,
-        data=hora_glicemia,
+        primeira_do_dia=True,
+        horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
         criado_por=id_usuario,
     )
@@ -48,11 +48,13 @@ def test_criar_nova_glicemia():
 def test_criar_glicemia_com_valores_invalidos():
     id_usuario = uuid4()
 
-    with pytest.raises(ValorDeGlicemiaInvalido):
-        Glicemia.criar_nova(
+    with pytest.raises(ValorDeGlicemiaInvalido) as e:
+        Glicemia.criar(
             valor=10,
-            jejum=True,
-            data=datetime.now(),
+            primeira_do_dia=True,
+            horario_dosagem=datetime.now(),
             observacoes="primeira glicemia do dia",
             criado_por=id_usuario,
         )
+
+        assert str(e.value) == "O valor da glicemia deve ser superior a 20mg/dl"

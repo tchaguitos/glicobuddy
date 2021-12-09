@@ -1,14 +1,17 @@
-from uuid import UUID
 from typing import Optional
+from uuid import UUID, uuid4
 from datetime import datetime
-from dataclasses import dataclass
+
+from dataclasses import dataclass, asdict
+from dataclass_type_validator import dataclass_validate
 
 
 class ValorDeGlicemiaInvalido(Exception):
     pass
 
 
-@dataclass
+@dataclass_validate
+@dataclass(frozen=True)
 class Auditoria:
     criado_por: UUID  # TODO: criar classe para usuario
     data_criacao: datetime
@@ -18,23 +21,23 @@ class Auditoria:
     deletado: bool = False
 
 
-@dataclass
+@dataclass_validate
+@dataclass(frozen=True)
 class Glicemia:
+    id: UUID
     valor: int
-    jejum: bool
-    data: datetime
     observacoes: str
+    primeira_do_dia: bool
+    horario_dosagem: datetime
     auditoria: Auditoria
 
-    # TODO: modelar melhor a valor "jejum"
-
     @classmethod
-    def criar_nova(
+    def criar(
         cls,
         valor: int,
-        jejum: bool,
-        data: datetime,
+        horario_dosagem: datetime,
         observacoes: str,
+        primeira_do_dia: bool,
         criado_por: UUID,
     ):
 
@@ -44,10 +47,11 @@ class Glicemia:
             )
 
         return cls(
+            id=uuid4(),
             valor=valor,
-            jejum=jejum,
-            data=data,
+            horario_dosagem=horario_dosagem,
             observacoes=observacoes,
+            primeira_do_dia=primeira_do_dia,
             auditoria=Auditoria(
                 criado_por=criado_por,
                 data_criacao=datetime.now(),
@@ -57,3 +61,16 @@ class Glicemia:
                 deletado=False,
             ),
         )
+
+    def editar(
+        id: UUID,
+        valor: int,
+        horario_dosagem: datetime,
+        observacoes: str,
+        primeira_do_dia: bool,
+        editado_por: UUID,
+    ):
+        asdict
+
+    def __atualizar_valor_se_necessario(self):
+        return

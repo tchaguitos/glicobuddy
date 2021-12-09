@@ -1,7 +1,11 @@
+from uuid import UUID
 from typing import Optional
-from uuid import UUID, uuid4
-from datetime import date, datetime
+from datetime import datetime
 from dataclasses import dataclass
+
+
+class ValorDeGlicemiaInvalido(Exception):
+    pass
 
 
 @dataclass
@@ -22,6 +26,8 @@ class Glicemia:
     observacoes: str
     auditoria: Auditoria
 
+    # TODO: modelar melhor a valor "jejum"
+
     @classmethod
     def criar_nova(
         cls,
@@ -31,6 +37,12 @@ class Glicemia:
         observacoes: str,
         criado_por: UUID,
     ):
+
+        if not valor > 20:
+            raise ValorDeGlicemiaInvalido(
+                "O valor da glicemia deve ser superior a 20mg/dl"
+            )
+
         return cls(
             valor=valor,
             jejum=jejum,

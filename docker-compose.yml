@@ -1,0 +1,9 @@
+version: "3"
+services:
+  postgres:
+    image : postgres
+    container_name: postgres-glicobuddy
+    volumes:
+      - ${POSTGRES_VOLUME_URL}
+    ports:
+      - 5432:5432

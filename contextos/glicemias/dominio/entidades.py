@@ -2,8 +2,10 @@ from typing import Optional
 from uuid import UUID, uuid4
 from datetime import datetime
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, replace
 from dataclass_type_validator import dataclass_validate
+
+from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
 
 class ValorDeGlicemiaInvalido(Exception):
@@ -11,7 +13,7 @@ class ValorDeGlicemiaInvalido(Exception):
 
 
 @dataclass_validate
-@dataclass(frozen=True)
+@dataclass
 class Auditoria:
     criado_por: UUID  # TODO: criar classe para usuario
     data_criacao: datetime
@@ -22,14 +24,14 @@ class Auditoria:
 
 
 @dataclass_validate
-@dataclass(frozen=True)
+@dataclass
 class Glicemia:
-    id: UUID
     valor: int
     observacoes: str
     primeira_do_dia: bool
     horario_dosagem: datetime
     auditoria: Auditoria
+    id: Optional[UUID] = None  # TODO: melhorar modelagem
 
     @classmethod
     def criar(
@@ -63,14 +65,34 @@ class Glicemia:
         )
 
     def editar(
-        id: UUID,
-        valor: int,
-        horario_dosagem: datetime,
-        observacoes: str,
-        primeira_do_dia: bool,
+        self,
         editado_por: UUID,
+        novos_valores: ValoresParaEdicaoDeGlicemia,
     ):
-        asdict
+        """"""
+        objeto_editado = self.__atualizar_valores(
+            novos_valores=novos_valores, editado_por=editado_por
+        )
 
-    def __atualizar_valor_se_necessario(self):
-        return
+        return objeto_editado
+
+    def __atualizar_valores(
+        self,
+        editado_por: UUID,
+        novos_valores: ValoresParaEdicaoDeGlicemia,
+    ):
+        """"""
+        novos_valores_glicemia = asdict(novos_valores)
+
+        self = replace(self, **novos_valores_glicemia)
+
+        novos_valores_auditoria = {
+            "data_ultima_edicao": datetime.now(),
+            "ultima_vez_editado_por": editado_por,
+        }
+
+        auditoria = replace(self.auditoria, **novos_valores_auditoria)
+
+        self.auditoria = auditoria
+
+        return self

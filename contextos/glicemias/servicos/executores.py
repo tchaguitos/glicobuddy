@@ -1,5 +1,5 @@
 from contextos.glicemias.dominio.entidades import Glicemia
-from contextos.glicemias.dominio.comandos import CriarGlicemia
+from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia
 
 
 def criar_glicemia(comando: CriarGlicemia):
@@ -12,3 +12,14 @@ def criar_glicemia(comando: CriarGlicemia):
     )
 
     return glicemia_criada
+
+
+def editar_glicemia(comando: EditarGlicemia):
+    glicemia = comando.glicemia
+
+    glicemia_editada = glicemia.editar(
+        editado_por=comando.editado_por,
+        novos_valores=comando.novos_valores,
+    )
+
+    return glicemia_editada

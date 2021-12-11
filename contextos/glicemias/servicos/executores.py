@@ -1,5 +1,5 @@
 from contextos.glicemias.dominio.entidades import Glicemia
-from contextos.glicemias.dominio.comandos.glicemias import CriarGlicemia
+from contextos.glicemias.dominio.comandos import CriarGlicemia
 
 
 def criar_glicemia(comando: CriarGlicemia):

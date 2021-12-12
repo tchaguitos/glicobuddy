@@ -7,7 +7,6 @@ from freezegun import freeze_time
 from contextos.glicemias.dominio.entidades import (
     Glicemia,
     Auditoria,
-    ValorDeGlicemiaInvalido,
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
@@ -60,7 +59,7 @@ def test_criar_glicemia():
 def test_criar_glicemia_com_valores_invalidos():
     id_usuario = uuid4()
 
-    with pytest.raises(ValorDeGlicemiaInvalido) as e:
+    with pytest.raises(Glicemia.ValorDeGlicemiaInvalido) as e:
         Glicemia.criar(
             valor=10,
             primeira_do_dia=True,
@@ -118,3 +117,31 @@ def test_editar_glicemia():
         )
 
     assert glicemia_apos_edicao == glicemia_esperada_apos_edicao
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_editar_glicemia_com_valores_invalidos():
+    id_usuario = uuid4()
+
+    horario_dosagem = datetime(2021, 8, 27, 8, 15)
+
+    glicemia_criada = Glicemia.criar(
+        valor=120,
+        primeira_do_dia=True,
+        horario_dosagem=horario_dosagem,
+        observacoes="primeira glicemia do dia",
+        criado_por=id_usuario,
+    )
+
+    with pytest.raises(Glicemia.ValorDeGlicemiaInvalido) as e:
+        glicemia_criada.editar(
+            novos_valores=ValoresParaEdicaoDeGlicemia(
+                valor=13,
+                primeira_do_dia=True,
+                horario_dosagem=horario_dosagem,
+                observacoes="glicose em jejum",
+            ),
+            editado_por=id_usuario,
+        )
+
+        assert str(e.value) == "O valor da glicemia deve ser superior a 20mg/dl"

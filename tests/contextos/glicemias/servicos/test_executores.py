@@ -1,6 +1,6 @@
 from uuid import uuid4
+from datetime import datetime
 from freezegun import freeze_time
-from datetime import datetime, timedelta
 
 from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
 from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia

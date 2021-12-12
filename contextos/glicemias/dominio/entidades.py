@@ -8,10 +8,6 @@ from dataclass_type_validator import dataclass_validate
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
 
-class ValorDeGlicemiaInvalido(Exception):
-    pass
-
-
 @dataclass_validate
 @dataclass
 class Auditoria:
@@ -33,6 +29,15 @@ class Glicemia:
     auditoria: Auditoria
     id: Optional[UUID] = None  # TODO: melhorar modelagem
 
+    class ValorDeGlicemiaInvalido(Exception):
+        pass
+
+    def __post_init__(self):
+        if not self.valor > 20:
+            raise Glicemia.ValorDeGlicemiaInvalido(
+                "O valor da glicemia deve ser superior a 20mg/dl"
+            )
+
     @classmethod
     def criar(
         cls,
@@ -42,12 +47,7 @@ class Glicemia:
         primeira_do_dia: bool,
         criado_por: UUID,
     ):
-
-        if not valor > 20:
-            raise ValorDeGlicemiaInvalido(
-                "O valor da glicemia deve ser superior a 20mg/dl"
-            )
-
+        """"""
         return cls(
             id=uuid4(),
             valor=valor,
@@ -76,6 +76,16 @@ class Glicemia:
 
         return objeto_editado
 
+    def __atualizar_valores_auditoria(self, editado_por: UUID):
+        novos_valores_auditoria = {
+            "data_ultima_edicao": datetime.now(),
+            "ultima_vez_editado_por": editado_por,
+        }
+
+        auditoria = replace(self.auditoria, **novos_valores_auditoria)
+
+        self.auditoria = auditoria
+
     def __atualizar_valores(
         self,
         editado_por: UUID,
@@ -86,13 +96,6 @@ class Glicemia:
 
         self = replace(self, **novos_valores_glicemia)
 
-        novos_valores_auditoria = {
-            "data_ultima_edicao": datetime.now(),
-            "ultima_vez_editado_por": editado_por,
-        }
-
-        auditoria = replace(self.auditoria, **novos_valores_auditoria)
-
-        self.auditoria = auditoria
+        self.__atualizar_valores_auditoria(editado_por=editado_por)
 
         return self

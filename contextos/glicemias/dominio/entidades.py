@@ -18,6 +18,16 @@ class Auditoria:
     ativo: bool = True
     deletado: bool = False
 
+    def __composite_values__(self):
+        return (
+            self.criado_por,
+            self.data_criacao,
+            self.ultima_vez_editado_por,
+            self.data_ultima_edicao,
+            self.ativo,
+            self.deletado,
+        )
+
 
 @dataclass_validate
 @dataclass

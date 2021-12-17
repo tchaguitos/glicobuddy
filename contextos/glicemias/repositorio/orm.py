@@ -1,54 +1,52 @@
-from uuid import uuid4
+
 from datetime import datetime
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy.orm import registry, composite
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import (
     Table,
-    MetaData,
     Column,
     Boolean,
     String,
     Integer,
     DateTime,
-    ForeignKey,
 )
 
 from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
 
-metadata = MetaData()
+mapper = registry()
+metadata = mapper.metadata
 
-tabela_auditoria = Table(
-    "auditoria",
+glicemia = Table(
+    "glicemia",
     metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True, default=uuid4),
-    Column("criado_por", String(94)),
+    Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
+    Column("valor", Integer),
+    Column("observacoes", String(255)),
+    Column("primeira_do_dia", Boolean, default=False),
+    Column("horario_dosagem", DateTime),
+    Column("criado_por", UUID(as_uuid=True)), # p abaixo colunas de auditoria
     Column("data_criacao", DateTime, default=datetime.now()),
-    Column("ultima_vez_editado_por", DateTime, nullable=True),
+    Column("ultima_vez_editado_por", UUID(as_uuid=True), nullable=True),
     Column("data_ultima_edicao", DateTime, nullable=True),
     Column("ativo", Boolean, default=True),
     Column("deletado", Boolean, default=False),
 )
 
-tabela_glicemia = Table(
-    "glicemia",
-    metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True, default=uuid4),
-    Column("valor", Integer),
-    Column("observacoes", String(255)),
-    Column("primeira_do_dia", Boolean, default=False),
-    Column("horario_dosagem", DateTime),
-)
-
-
-mapper_auditoria = mapper(Auditoria, tabela_auditoria)
-
-mapper_glicemia = mapper(
+mapper_glicemia = mapper.map_imperatively(
     Glicemia,
-    tabela_glicemia,
+    glicemia,
     properties={
-        "auditoria": relationship(
-            mapper_auditoria,
-            secondary=tabela_auditoria,
+        "auditoria": composite(
+            Auditoria,
+            glicemia.c.criado_por,
+            glicemia.c.data_criacao,
+            glicemia.c.ultima_vez_editado_por,
+            glicemia.c.data_ultima_edicao,
+            glicemia.c.ativo,
+            glicemia.c.deletado,
         )
     },
 )
+
+def start_mappers():
+    mapper_glicemia

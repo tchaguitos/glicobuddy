@@ -9,6 +9,6 @@ from contextos.glicemias.repositorio.orm import start_mappers
 def session():
     start_mappers()
 
-    session = get_session()
+    session = get_session(is_test=True)
 
     yield session

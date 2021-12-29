@@ -4,7 +4,6 @@ from sqlalchemy.orm import sessionmaker
 from contextos.glicemias.repositorio.orm import metadata
 
 
-
 def get_session(engine = None, is_test: bool = False):
     """"""
     if not engine:

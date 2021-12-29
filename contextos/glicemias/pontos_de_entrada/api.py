@@ -4,10 +4,11 @@ from fastapi import FastAPI
 from datetime import datetime
 from pydantic import BaseModel, Extra
 
-from contextos.glicemias.dominio.entidades import Glicemia
-
 from contextos.glicemias.dominio.comandos import CriarGlicemia
 from contextos.glicemias.servicos.executores import criar_glicemia
+from contextos.glicemias.repositorio import repo_dominio
+
+from config import DEFAULT_SESSION_FACTORY
 
 
 app = FastAPI()
@@ -29,7 +30,11 @@ class RetornoDeCriacaoDeGlicemia(BaseModel):
 
 @app.post("/v1/glicemias", response_model=RetornoDeCriacaoDeGlicemia, status_code=201)
 def cadastrar_glicemia(nova_glicemia: ValoresParaCriacaoDeGlicemia) -> UUID:
+    # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
+
+    session = DEFAULT_SESSION_FACTORY()
+    repo = repo_dominio.SqlAlchemyRepository(session)
 
     glicemia_criada = criar_glicemia(
         comando=CriarGlicemia(
@@ -39,6 +44,8 @@ def cadastrar_glicemia(nova_glicemia: ValoresParaCriacaoDeGlicemia) -> UUID:
             horario_dosagem=nova_glicemia.horario_dosagem,
             criado_por=usuario_id,
         ),
+        repo=repo,
+        session=session,
     )
 
     return RetornoDeCriacaoDeGlicemia(id=glicemia_criada.id)

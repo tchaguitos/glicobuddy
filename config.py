@@ -11,7 +11,6 @@ def get_session(engine = None, is_test: bool = False):
         engine = create_engine("postgresql+psycopg2://glico:test@localhost/glicotest")
 
     if is_test is True:
-        metadata.drop_all(engine)
         metadata.create_all(engine)
 
     return sessionmaker(bind=engine)()

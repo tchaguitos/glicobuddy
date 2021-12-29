@@ -1,11 +1,8 @@
 import pytest
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
 from config import get_session
 
-from contextos.glicemias.repositorio.orm import metadata, start_mappers
+from contextos.glicemias.repositorio.orm import start_mappers
 
 
 @pytest.fixture(scope="session")

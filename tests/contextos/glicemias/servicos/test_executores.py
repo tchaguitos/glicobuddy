@@ -1,15 +1,53 @@
+from uuid import UUID
 from uuid import uuid4
 from datetime import datetime
+from typing import Set, Optional
 from freezegun import freeze_time
+
+from contextos.glicemias.dominio.entidades import Glicemia
 
 from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
 from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia
 from contextos.glicemias.servicos.executores import criar_glicemia, editar_glicemia
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
+from contextos.glicemias.repositorio.repo_dominio import AbstractRepository
+
+
+# TODO: transformar em fixture ou algo do tipo
+class FakeSession:
+    commited = False
+
+    def commit(self):
+        self.commited = True
+
+class FakeRepo(AbstractRepository):
+    __glicemias: Set[Glicemia] = set()
+
+    def __init__(self, glicemias: Optional[Set[Glicemia]] = None):
+        if not glicemias:
+            glicemias = set()
+
+        self.__glicemias = glicemias
+
+    def adicionar(self, glicemia: Glicemia):
+        self.__glicemias.add(glicemia)
+
+    def remover(self, glicemia: Glicemia):
+        self.__glicemias.remove(glicemia)
+
+    def consultar_todos(self):
+        yield from self.__glicemias
+
+    def consultar_por_id(self, glicemia_id: UUID):
+        yield from next(
+            glicemia for glicemia in self.__glicemias if glicemia.id == glicemia_id
+        )
+
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_criar_glicemia():
+    repo = FakeRepo()
     id_usuario = uuid4()
 
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
@@ -22,7 +60,14 @@ def test_criar_glicemia():
         criado_por=id_usuario,
     )
 
-    glicemia_criada = criar_glicemia(comando=comando)
+    registros_no_banco = list(repo.consultar_todos()
+    assert len(registros_no_banco) == 0
+
+    glicemia_criada = criar_glicemia(
+        comando=comando,
+        repo=repo,
+        session=FakeSession(),
+    )
 
     glicemia_esperada = Glicemia(
         valor=98,
@@ -52,6 +97,11 @@ def test_criar_glicemia():
         == glicemia_esperada.auditoria.data_criacao
     )
 
+    registros_no_banco = repo.consultar_todos()
+
+    assert len(registros_no_banco) == 1
+    assert registros_no_banco[0] == glicemia_criada
+
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_editar_glicemia():
@@ -68,7 +118,11 @@ def test_editar_glicemia():
         criado_por=id_usuario,
     )
 
-    glicemia_criada = criar_glicemia(comando=comando)
+    glicemia_criada = criar_glicemia(
+        comando=comando,
+        repo=FakeRepo(),
+        session=FakeSession(),
+    )
 
     with freeze_time(horario_edicao):
         glicemia_editada = editar_glicemia(
@@ -81,7 +135,9 @@ def test_editar_glicemia():
                     observacoes="teste mano afff",
                 ),
                 editado_por=id_usuario,
-            )
+            ),
+            repo=FakeRepo(),
+            session=FakeSession(),
         )
 
     glicemia_esperada_apos_edicao = Glicemia(

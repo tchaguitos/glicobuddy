@@ -14,6 +14,4 @@ def session():
 
     session = get_session()
 
-    session.execute("DELETE FROM glicemia")
-
     yield session

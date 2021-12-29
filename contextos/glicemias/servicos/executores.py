@@ -1,13 +1,9 @@
 from contextos.glicemias.dominio.entidades import Glicemia
 from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia
 
-from config import DEFAULT_SESSION_FACTORY
-from contextos.glicemias.repositorio import repo_dominio
+from contextos.glicemias.repositorio.repo_dominio import SqlAlchemyRepository
 
-def criar_glicemia(comando: CriarGlicemia):
-    session = DEFAULT_SESSION_FACTORY()
-    repo = repo_dominio.SqlAlchemyRepository(session)
-
+def criar_glicemia(comando: CriarGlicemia, repo: SqlAlchemyRepository, session):
     glicemia_criada = Glicemia.criar(
         valor=comando.valor,
         horario_dosagem=comando.horario_dosagem,
@@ -22,10 +18,7 @@ def criar_glicemia(comando: CriarGlicemia):
     return glicemia_criada
 
 
-def editar_glicemia(comando: EditarGlicemia):
-    session = DEFAULT_SESSION_FACTORY()
-    repo = repo_dominio.SqlAlchemyRepository(session)
-
+def editar_glicemia(comando: EditarGlicemia, repo: SqlAlchemyRepository, session):
     glicemia = comando.glicemia
 
     glicemia_editada = glicemia.editar(

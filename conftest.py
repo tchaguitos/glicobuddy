@@ -3,20 +3,16 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from contextos.glicemias.repositorio.orm import metadata, start_mappers
+from config import DEFAULT_SESSION_FACTORY
+
+from contextos.glicemias.repositorio import orm
 
 
-@pytest.fixture
-def conexao_db():
-    engine = create_engine("postgresql+psycopg2://glico:test@localhost/glicotest")
+@pytest.fixture(scope="session")
+def session():
+    orm.start_mappers()
 
-    metadata.drop_all(engine)
-    metadata.create_all(engine)
+    session = DEFAULT_SESSION_FACTORY()
+    session.execute("DELETE FROM glicemia")
 
-    return engine
-
-
-@pytest.fixture
-def session(conexao_db):
-    start_mappers()
-    yield sessionmaker(bind=conexao_db)()
+    yield session

@@ -60,7 +60,7 @@ def test_criar_glicemia():
         criado_por=id_usuario,
     )
 
-    registros_no_banco = list(repo.consultar_todos()
+    registros_no_banco = list(repo.consultar_todos())
     assert len(registros_no_banco) == 0
 
     glicemia_criada = criar_glicemia(
@@ -97,7 +97,7 @@ def test_criar_glicemia():
         == glicemia_esperada.auditoria.data_criacao
     )
 
-    registros_no_banco = repo.consultar_todos()
+    registros_no_banco = list(repo.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada

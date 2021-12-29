@@ -31,7 +31,7 @@ def test_repositorio_adicionar_glicemia(session):
     assert len(registros) == 1
     assert registros[0].id == glicemia.id
 
-    session.close()
+    session.execute("DELETE FROM glicemia")
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -64,7 +64,7 @@ def test_repositorio_remover_glicemia(session):
 
     assert len(list(rows)) == 0
 
-    session.close()
+    session.execute("DELETE FROM glicemia")
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_repositorio_consultar_glicemias(session):
@@ -85,7 +85,6 @@ def test_repositorio_consultar_glicemias(session):
 
     assert len(registros_no_banco) == 1
 
-    session.close()
 
     glicemia_2 = Glicemia.criar(
         valor=87,
@@ -111,7 +110,7 @@ def test_repositorio_consultar_glicemias(session):
 
     assert len(registros_no_banco) == 3
 
-    session.close()
+    session.execute("DELETE FROM glicemia")
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -133,4 +132,4 @@ def test_repositorio_consultar_glicemia_por_id(session):
 
     assert glicemia_criada == glicemia_salva_no_banco
 
-    session.close()
+    session.execute("DELETE FROM glicemia")

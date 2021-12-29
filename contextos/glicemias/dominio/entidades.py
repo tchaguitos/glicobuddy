@@ -42,6 +42,9 @@ class Glicemia:
     class ValorDeGlicemiaInvalido(Exception):
         pass
 
+    def __hash__(self):
+        return hash(self.id)
+
     def __post_init__(self):
         if not self.valor > 20:
             raise Glicemia.ValorDeGlicemiaInvalido(

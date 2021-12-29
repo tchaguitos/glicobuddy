@@ -10,7 +10,7 @@ client = TestClient(app)
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_criar_glicemia():
+def test_criar_glicemia(session):
     horario_dosagem = datetime.now()
 
     glicemia_a_ser_criada = {

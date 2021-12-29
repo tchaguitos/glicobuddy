@@ -8,7 +8,7 @@ from contextos.glicemias.dominio.comandos import CriarGlicemia
 from contextos.glicemias.servicos.executores import criar_glicemia
 from contextos.glicemias.repositorio import repo_dominio
 
-from config import DEFAULT_SESSION_FACTORY
+from config import get_session
 
 
 app = FastAPI()
@@ -33,7 +33,7 @@ def cadastrar_glicemia(nova_glicemia: ValoresParaCriacaoDeGlicemia) -> UUID:
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
-    session = DEFAULT_SESSION_FACTORY()
+    session = get_session()
     repo = repo_dominio.SqlAlchemyRepository(session)
 
     glicemia_criada = criar_glicemia(

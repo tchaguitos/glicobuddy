@@ -3,16 +3,17 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from config import DEFAULT_SESSION_FACTORY
+from config import get_session
 
-from contextos.glicemias.repositorio import orm
+from contextos.glicemias.repositorio.orm import metadata, start_mappers
 
 
 @pytest.fixture(scope="session")
 def session():
-    orm.start_mappers()
+    start_mappers()
 
-    session = DEFAULT_SESSION_FACTORY()
+    session = get_session()
+
     session.execute("DELETE FROM glicemia")
 
     yield session

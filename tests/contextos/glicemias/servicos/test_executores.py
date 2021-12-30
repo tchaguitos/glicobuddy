@@ -42,6 +42,9 @@ class FakeRepo(AbstractRepository):
     def adicionar(self, glicemia: Glicemia):
         self.__glicemias.add(glicemia)
 
+    def atualizar(self, glicemia: Glicemia):
+        return glicemia
+
     def remover(self, glicemia: Glicemia):
         self.__glicemias.remove(glicemia)
 

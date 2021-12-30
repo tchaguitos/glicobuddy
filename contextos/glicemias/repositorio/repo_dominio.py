@@ -1,5 +1,6 @@
 import abc
 from uuid import UUID
+from typing import Iterator
 from contextos.glicemias.dominio.entidades import Glicemia
 
 
@@ -28,11 +29,14 @@ class SqlAlchemyRepository(AbstractRepository):
     def adicionar(self, glicemia: Glicemia):
         self.session.add(glicemia)
 
+    def atualizar(self, glicemia: Glicemia):
+        self.session.merge(glicemia)
+
     def remover(self, glicemia: Glicemia):
         self.session.delete(glicemia)
 
-    def consultar_todos(self):
+    def consultar_todos(self) -> Iterator[Glicemia]:
         return self.session.query(Glicemia).all()
 
-    def consultar_por_id(self, id: UUID):
+    def consultar_por_id(self, id: UUID) -> Glicemia:
         return self.session.query(Glicemia).filter_by(id=id).one()

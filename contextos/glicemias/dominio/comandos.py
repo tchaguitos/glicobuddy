@@ -23,3 +23,9 @@ class EditarGlicemia:
     glicemia_id: UUID
     novos_valores: ValoresParaEdicaoDeGlicemia
     editado_por: UUID
+
+
+@dataclass_validate
+@dataclass(frozen=True)
+class RemoverGlicemia:
+    glicemia_id: UUID

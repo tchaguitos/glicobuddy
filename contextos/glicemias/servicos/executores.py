@@ -1,5 +1,5 @@
 from contextos.glicemias.dominio.entidades import Glicemia
-from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia
+from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia, RemoverGlicemia
 
 from contextos.glicemias.repositorio.repo_dominio import SqlAlchemyRepository
 
@@ -30,3 +30,12 @@ def editar_glicemia(comando: EditarGlicemia, repo: SqlAlchemyRepository, session
     session.commit()
 
     return glicemia_editada
+
+
+def remover_glicemia(comando: RemoverGlicemia, repo: SqlAlchemyRepository, session):
+    glicemia = repo.consultar_por_id(id=comando.glicemia_id)
+
+    repo.remover(glicemia)
+    session.commit()
+
+    return glicemia.id

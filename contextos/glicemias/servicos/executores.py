@@ -1,7 +1,13 @@
+from uuid import UUID
 from contextos.glicemias.dominio.entidades import Glicemia
-from contextos.glicemias.dominio.comandos import CriarGlicemia, EditarGlicemia, RemoverGlicemia
+from contextos.glicemias.dominio.comandos import (
+    CriarGlicemia,
+    EditarGlicemia,
+    RemoverGlicemia,
+)
 
 from contextos.glicemias.repositorio.repo_dominio import SqlAlchemyRepository
+
 
 def criar_glicemia(comando: CriarGlicemia, repo: SqlAlchemyRepository, session):
     glicemia_criada = Glicemia.criar(
@@ -26,13 +32,15 @@ def editar_glicemia(comando: EditarGlicemia, repo: SqlAlchemyRepository, session
         novos_valores=comando.novos_valores,
     )
 
-    repo.adicionar(glicemia_editada)
+    repo.atualizar(glicemia_editada)
     session.commit()
 
     return glicemia_editada
 
 
-def remover_glicemia(comando: RemoverGlicemia, repo: SqlAlchemyRepository, session):
+def remover_glicemia(
+    comando: RemoverGlicemia, repo: SqlAlchemyRepository, session
+) -> UUID:
     glicemia = repo.consultar_por_id(id=comando.glicemia_id)
 
     repo.remover(glicemia)

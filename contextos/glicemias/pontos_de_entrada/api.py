@@ -4,8 +4,18 @@ from fastapi import FastAPI
 from datetime import datetime
 from pydantic import BaseModel, Extra
 
-from contextos.glicemias.dominio.comandos import CriarGlicemia
-from contextos.glicemias.servicos.executores import criar_glicemia
+from contextos.glicemias.dominio.comandos import (
+    CriarGlicemia,
+    EditarGlicemia,
+    RemoverGlicemia,
+)
+from contextos.glicemias.servicos.executores import (
+    criar_glicemia,
+    editar_glicemia,
+    remover_glicemia,
+)
+from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
+
 from contextos.glicemias.repositorio import repo_dominio
 
 from config import get_session
@@ -14,7 +24,7 @@ from config import get_session
 app = FastAPI()
 
 
-class ValoresParaCriacaoDeGlicemia(BaseModel):
+class ValoresParaCriacaoDeGlicemiaAPI(BaseModel):
     valor: int
     observacoes: str
     primeira_do_dia: bool
@@ -24,12 +34,28 @@ class ValoresParaCriacaoDeGlicemia(BaseModel):
         extra = Extra.forbid
 
 
-class RetornoDeCriacaoDeGlicemia(BaseModel):
+class ValoresParaEdicaoDeGlicemiaAPI(BaseModel):
+    valor: int
+    observacoes: str
+    primeira_do_dia: bool
+    horario_dosagem: datetime
+
+    class Config:
+        extra = Extra.forbid
+
+
+class RetornoDeGlicemiasAPI(BaseModel):
     id: UUID
 
 
-@app.post("/v1/glicemias", response_model=RetornoDeCriacaoDeGlicemia, status_code=201)
-def cadastrar_glicemia(nova_glicemia: ValoresParaCriacaoDeGlicemia) -> UUID:
+@app.post(
+    "/v1/glicemias",
+    response_model=RetornoDeGlicemiasAPI,
+    status_code=201,
+)
+def cadastrar_glicemia(
+    nova_glicemia: ValoresParaCriacaoDeGlicemiaAPI,
+) -> RetornoDeGlicemiasAPI:
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
@@ -48,4 +74,54 @@ def cadastrar_glicemia(nova_glicemia: ValoresParaCriacaoDeGlicemia) -> UUID:
         session=session,
     )
 
-    return RetornoDeCriacaoDeGlicemia(id=glicemia_criada.id)
+    return RetornoDeGlicemiasAPI(id=glicemia_criada.id)
+
+
+@app.patch(
+    "/v1/glicemias/{glicemia_id}",
+    response_model=RetornoDeGlicemiasAPI,
+    status_code=200,
+)
+def atualizar_glicemia(
+    glicemia_id: UUID, novos_valores: ValoresParaEdicaoDeGlicemiaAPI
+) -> RetornoDeGlicemiasAPI:
+    # TODO: receber o usuário por meio da requisicao
+    usuario_id = uuid4()
+
+    session = get_session()
+    repo = repo_dominio.SqlAlchemyRepository(session)
+
+    glicemia_editada = editar_glicemia(
+        comando=EditarGlicemia(
+            glicemia_id=glicemia_id,
+            novos_valores=ValoresParaEdicaoDeGlicemia(
+                valor=novos_valores.valor,
+                observacoes=novos_valores.observacoes,
+                primeira_do_dia=novos_valores.primeira_do_dia,
+                horario_dosagem=novos_valores.horario_dosagem,
+            ),
+            editado_por=usuario_id,
+        ),
+        repo=repo,
+        session=session,
+    )
+
+    return RetornoDeGlicemiasAPI(id=glicemia_editada.id)
+
+
+@app.delete(
+    "/v1/glicemias/{glicemia_id}", response_model=RetornoDeGlicemiasAPI, status_code=200
+)
+def deletar_glicemia(glicemia_id: UUID) -> RetornoDeGlicemiasAPI:
+    session = get_session()
+    repo = repo_dominio.SqlAlchemyRepository(session)
+
+    id_glicemia_removida = remover_glicemia(
+        comando=RemoverGlicemia(
+            glicemia_id=glicemia_id,
+        ),
+        repo=repo,
+        session=session,
+    )
+
+    return RetornoDeGlicemiasAPI(id=id_glicemia_removida)

@@ -20,6 +20,6 @@ class CriarGlicemia:
 @dataclass_validate
 @dataclass(frozen=True)
 class EditarGlicemia:
-    glicemia: Glicemia
+    glicemia_id: UUID
     novos_valores: ValoresParaEdicaoDeGlicemia
     editado_por: UUID

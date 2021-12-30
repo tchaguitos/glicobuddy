@@ -39,15 +39,17 @@ class FakeRepo(AbstractRepository):
     def consultar_todos(self):
         yield from self.__glicemias
 
-    def consultar_por_id(self, glicemia_id: UUID):
-        yield from next(
-            glicemia for glicemia in self.__glicemias if glicemia.id == glicemia_id
+    def consultar_por_id(self, id: UUID):
+        return next(
+            glicemia for glicemia in self.__glicemias if glicemia.id == id
         )
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_criar_glicemia():
     repo = FakeRepo()
+    session = FakeSession()
+
     id_usuario = uuid4()
 
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
@@ -66,8 +68,10 @@ def test_criar_glicemia():
     glicemia_criada = criar_glicemia(
         comando=comando,
         repo=repo,
-        session=FakeSession(),
+        session=session,
     )
+
+    assert session.commited is True
 
     glicemia_esperada = Glicemia(
         valor=98,
@@ -105,6 +109,9 @@ def test_criar_glicemia():
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_editar_glicemia():
+    repo = FakeRepo()
+    session = FakeSession()
+
     id_usuario = uuid4()
 
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
@@ -120,14 +127,16 @@ def test_editar_glicemia():
 
     glicemia_criada = criar_glicemia(
         comando=comando,
-        repo=FakeRepo(),
-        session=FakeSession(),
+        repo=repo,
+        session=session,
     )
+
+    assert session.commited is True
 
     with freeze_time(horario_edicao):
         glicemia_editada = editar_glicemia(
             comando=EditarGlicemia(
-                glicemia=glicemia_criada,
+                glicemia_id=glicemia_criada.id,
                 novos_valores=ValoresParaEdicaoDeGlicemia(
                     valor=98,
                     primeira_do_dia=True,
@@ -136,8 +145,8 @@ def test_editar_glicemia():
                 ),
                 editado_por=id_usuario,
             ),
-            repo=FakeRepo(),
-            session=FakeSession(),
+            repo=repo,
+            session=session,
         )
 
     glicemia_esperada_apos_edicao = Glicemia(

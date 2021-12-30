@@ -19,7 +19,7 @@ def criar_glicemia(comando: CriarGlicemia, repo: SqlAlchemyRepository, session):
 
 
 def editar_glicemia(comando: EditarGlicemia, repo: SqlAlchemyRepository, session):
-    glicemia = comando.glicemia
+    glicemia = repo.consultar_por_id(id=comando.glicemia_id)
 
     glicemia_editada = glicemia.editar(
         editado_por=comando.editado_por,

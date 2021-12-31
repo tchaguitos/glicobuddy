@@ -20,14 +20,7 @@ from contextos.glicemias.servicos.executores import (
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
 from contextos.glicemias.repositorio.repo_dominio import AbstractRepository
-
-
-# TODO: transformar em fixture ou algo do tipo
-class FakeSession:
-    commited = False
-
-    def commit(self):
-        self.commited = True
+from contextos.glicemias.servicos.unidade_de_trabalho import AbstractUnitOfWork
 
 
 class FakeRepo(AbstractRepository):
@@ -55,36 +48,43 @@ class FakeRepo(AbstractRepository):
         return next(glicemia for glicemia in self.__glicemias if glicemia.id == id)
 
 
+class FakeUOW(AbstractUnitOfWork):
+    def __init__(self):
+        self.repo = FakeRepo(set())
+        self.committed = False
+
+    def commit(self):
+        self.committed = True
+
+    def rollback(self):
+        pass
+
+
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_criar_glicemia():
-    repo = FakeRepo()
-    session = FakeSession()
+    uow = FakeUOW()
 
     id_usuario = uuid4()
-
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
 
-    comando = CriarGlicemia(
-        valor=98,
-        horario_dosagem=horario_dosagem,
-        observacoes="glicose em jejum",
-        primeira_do_dia=True,
-        criado_por=id_usuario,
-    )
-
-    registros_no_banco = list(repo.consultar_todos())
+    registros_no_banco = list(uow.repo.consultar_todos())
 
     assert len(registros_no_banco) == 0
 
     glicemia_criada = criar_glicemia(
-        comando=comando,
-        repo=repo,
-        session=session,
+        comando=CriarGlicemia(
+            valor=98,
+            horario_dosagem=horario_dosagem,
+            observacoes="glicose em jejum",
+            primeira_do_dia=True,
+            criado_por=id_usuario,
+        ),
+        uow=uow,
     )
 
-    assert session.commited is True
+    assert uow.committed is True
 
-    registros_no_banco = list(repo.consultar_todos())
+    registros_no_banco = list(uow.repo.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada
@@ -105,44 +105,35 @@ def test_criar_glicemia():
     )
 
     assert glicemia_criada.id
-    assert glicemia_criada.valor == glicemia_esperada.valor
-    assert glicemia_criada.primeira_do_dia == glicemia_esperada.primeira_do_dia
-    assert glicemia_criada.horario_dosagem == glicemia_esperada.horario_dosagem
-    assert glicemia_criada.observacoes == glicemia_esperada.observacoes
-    assert (
-        glicemia_criada.auditoria.criado_por == glicemia_esperada.auditoria.criado_por
-    )
-    assert (
-        glicemia_criada.auditoria.data_criacao
-        == glicemia_esperada.auditoria.data_criacao
-    )
+    assert glicemia_criada.valor == 98
+    assert glicemia_criada.primeira_do_dia is True
+    assert glicemia_criada.horario_dosagem == horario_dosagem
+    assert glicemia_criada.observacoes == "glicose em jejum"
+    assert glicemia_criada.auditoria.criado_por == id_usuario
+    assert glicemia_criada.auditoria.data_criacao == datetime.now()
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_editar_glicemia():
-    repo = FakeRepo()
-    session = FakeSession()
+    uow = FakeUOW()
 
     id_usuario = uuid4()
 
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
     horario_edicao = datetime(2021, 8, 27, 16, 21)
 
-    comando = CriarGlicemia(
-        valor=105,
-        horario_dosagem=horario_dosagem,
-        observacoes="glicose em jejum",
-        primeira_do_dia=True,
-        criado_por=id_usuario,
-    )
-
     glicemia_criada = criar_glicemia(
-        comando=comando,
-        repo=repo,
-        session=session,
+        comando=CriarGlicemia(
+            valor=105,
+            horario_dosagem=horario_dosagem,
+            observacoes="glicose em jejum",
+            primeira_do_dia=True,
+            criado_por=id_usuario,
+        ),
+        uow=uow,
     )
 
-    assert session.commited is True
+    assert uow.committed is True
 
     with freeze_time(horario_edicao):
         glicemia_editada = editar_glicemia(
@@ -156,8 +147,7 @@ def test_editar_glicemia():
                 ),
                 editado_por=id_usuario,
             ),
-            repo=repo,
-            session=session,
+            uow=uow,
         )
 
     glicemia_esperada_apos_edicao = Glicemia(
@@ -181,10 +171,9 @@ def test_editar_glicemia():
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_remover_glicemia():
-    repo = FakeRepo()
-    session = FakeSession()
+    uow = FakeUOW()
 
-    registros_no_banco = list(repo.consultar_todos())
+    registros_no_banco = list(uow.repo.consultar_todos())
 
     assert len(registros_no_banco) == 0
 
@@ -196,25 +185,23 @@ def test_remover_glicemia():
             primeira_do_dia=False,
             criado_por=uuid4(),
         ),
-        repo=repo,
-        session=session,
+        uow=uow,
     )
 
-    assert session.commited is True
+    assert uow.committed is True
 
-    registros_no_banco = list(repo.consultar_todos())
+    registros_no_banco = list(uow.repo.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada
 
     id_glicemia_removida = remover_glicemia(
         comando=RemoverGlicemia(glicemia_id=glicemia_criada.id),
-        repo=repo,
-        session=session,
+        uow=uow,
     )
 
     assert id_glicemia_removida == glicemia_criada.id
 
-    registros_no_banco = list(repo.consultar_todos())
+    registros_no_banco = list(uow.repo.consultar_todos())
 
     assert len(registros_no_banco) == 0

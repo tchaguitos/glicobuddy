@@ -22,4 +22,4 @@ def get_postgres_uri():
     senha = os.environ.get("DB_PASSWORD", "test")
     host = os.environ.get("DB_HOST", "localhost")
     db_name = os.environ.get("DB_NAME", "glicotest")
-    return f"postgresql+psycopg2:://{usuario}:{senha}@{host}/{db_name}"
+    return f"postgresql+psycopg2://{usuario}:{senha}@{host}/{db_name}"

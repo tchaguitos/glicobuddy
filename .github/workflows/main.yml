@@ -36,10 +36,6 @@ jobs:
       run: |
         pytest
 
-  check_coverage:
-    name: Verificando cobertura de testes
-    needs: build
-    steps:
-      - name: Verificando cobertura de testes
+    - name: Verificando cobertura de testes
         run: |
           pytest --cov=contextos/ tests/ --cov-fail-under=90

@@ -16,9 +16,7 @@ from contextos.glicemias.servicos.executores import (
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
-from contextos.glicemias.repositorio import repo_dominio
-
-from config import get_session
+from contextos.glicemias.servicos.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
 
 app = FastAPI()
@@ -59,8 +57,7 @@ def cadastrar_glicemia(
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
-    session = get_session()
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    uow = SqlAlchemyUnitOfWork()
 
     glicemia_criada = criar_glicemia(
         comando=CriarGlicemia(
@@ -70,8 +67,7 @@ def cadastrar_glicemia(
             horario_dosagem=nova_glicemia.horario_dosagem,
             criado_por=usuario_id,
         ),
-        repo=repo,
-        session=session,
+        uow=uow,
     )
 
     return RetornoDeGlicemiasAPI(id=glicemia_criada.id)
@@ -88,8 +84,7 @@ def atualizar_glicemia(
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
-    session = get_session()
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    uow = SqlAlchemyUnitOfWork()
 
     glicemia_editada = editar_glicemia(
         comando=EditarGlicemia(
@@ -102,8 +97,7 @@ def atualizar_glicemia(
             ),
             editado_por=usuario_id,
         ),
-        repo=repo,
-        session=session,
+        uow=uow,
     )
 
     return RetornoDeGlicemiasAPI(id=glicemia_editada.id)
@@ -113,15 +107,13 @@ def atualizar_glicemia(
     "/v1/glicemias/{glicemia_id}", response_model=RetornoDeGlicemiasAPI, status_code=200
 )
 def deletar_glicemia(glicemia_id: UUID) -> RetornoDeGlicemiasAPI:
-    session = get_session()
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    uow = SqlAlchemyUnitOfWork()
 
     id_glicemia_removida = remover_glicemia(
         comando=RemoverGlicemia(
             glicemia_id=glicemia_id,
         ),
-        repo=repo,
-        session=session,
+        uow=uow,
     )
 
     return RetornoDeGlicemiasAPI(id=id_glicemia_removida)

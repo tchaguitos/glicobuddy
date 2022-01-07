@@ -22,7 +22,7 @@ def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork):
         uow.repo.adicionar(nova_glicemia)
         uow.commit()
 
-        return nova_glicemia
+    return nova_glicemia
 
 
 def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork):
@@ -38,7 +38,7 @@ def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork):
         uow.repo.atualizar(glicemia_editada)
         uow.commit()
 
-        return glicemia_editada
+    return glicemia_editada
 
 
 def remover_glicemia(comando: RemoverGlicemia, uow: AbstractUnitOfWork) -> UUID:
@@ -48,4 +48,4 @@ def remover_glicemia(comando: RemoverGlicemia, uow: AbstractUnitOfWork) -> UUID:
         uow.repo.remover(glicemia)
         uow.commit()
 
-        return glicemia.id
+    return glicemia.id

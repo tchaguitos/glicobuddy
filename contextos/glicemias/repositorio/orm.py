@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from sqlalchemy.orm import registry, composite
 from sqlalchemy.dialects.postgresql import UUID
@@ -24,7 +23,7 @@ glicemia = Table(
     Column("observacoes", String(255)),
     Column("primeira_do_dia", Boolean, default=False),
     Column("horario_dosagem", DateTime),
-    Column("criado_por", UUID(as_uuid=True)), # p abaixo colunas de auditoria
+    Column("criado_por", UUID(as_uuid=True)),  # p abaixo colunas de auditoria
     Column("data_criacao", DateTime, default=datetime.now()),
     Column("ultima_vez_editado_por", UUID(as_uuid=True), nullable=True),
     Column("data_ultima_edicao", DateTime, nullable=True),
@@ -47,6 +46,7 @@ mapper_glicemia = mapper.map_imperatively(
         )
     },
 )
+
 
 def start_mappers():
     mapper_glicemia

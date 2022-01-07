@@ -1,8 +1,6 @@
 import abc
-import config
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from config import get_session_factory
 from sqlalchemy.orm.session import Session
 
 from contextos.glicemias.repositorio.repo_dominio import (
@@ -29,19 +27,12 @@ class AbstractUnitOfWork(abc.ABC):
         raise NotImplementedError
 
 
-DEFAULT_SESSION_FACTORY = sessionmaker(
-    bind=create_engine(
-        config.get_postgres_uri(),
-    )
-)
-
-
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):
+    def __init__(self, session_factory=get_session_factory):
         self.session_factory = session_factory
 
     def __enter__(self):
-        self.session: Session = self.session_factory()  # type: Session
+        self.session: Session = self.session_factory()
         self.repo: SqlAlchemyRepository = SqlAlchemyRepository(self.session)
 
         return super().__enter__()

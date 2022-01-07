@@ -3,18 +3,20 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from contextos.glicemias.repositorio.orm import metadata
+from contextos.glicemias.repositorio.orm import metadata, start_mappers
 
 
-def get_session(engine=None, is_test: bool = False):
-    """"""
+def get_session_factory(engine=None, is_test: bool = False):
     if not engine:
-        engine = create_engine("postgresql+psycopg2://glico:test@localhost/glicotest")
+        engine = create_engine(get_postgres_uri())
 
     if is_test is True:
+        metadata.drop_all(engine)
         metadata.create_all(engine)
 
-    return sessionmaker(bind=engine)()
+    start_mappers()
+
+    return sessionmaker(bind=engine, expire_on_commit=False)()
 
 
 def get_postgres_uri():

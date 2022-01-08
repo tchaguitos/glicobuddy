@@ -1,8 +1,11 @@
 from uuid import UUID, uuid4
 
+from typing import List
 from fastapi import FastAPI
 from datetime import datetime
 from pydantic import BaseModel, Extra
+
+from contextos.glicemias.dominio.entidades import Glicemia
 
 from contextos.glicemias.dominio.comandos import (
     CriarGlicemia,
@@ -13,6 +16,10 @@ from contextos.glicemias.servicos.executores import (
     criar_glicemia,
     editar_glicemia,
     remover_glicemia,
+)
+from contextos.glicemias.servicos.visualizadores import (
+    consultar_glicemias,
+    consultar_glicemia_por_id,
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
@@ -44,6 +51,28 @@ class ValoresParaEdicaoDeGlicemiaAPI(BaseModel):
 
 class RetornoDeGlicemiasAPI(BaseModel):
     id: UUID
+
+
+class RetornoDeConsultaGlicemiasAPI(BaseModel):
+    glicemias: List[Glicemia]
+
+
+@app.get(
+    "/v1/glicemias",
+    response_model=RetornoDeConsultaGlicemiasAPI,
+    status_code=200,
+)
+def listar_glicemias():
+    usuario_id = uuid4()
+
+    uow = SqlAlchemyUnitOfWork()
+
+    glicemias = consultar_glicemias(
+        usuario_id=usuario_id,
+        uow=uow,
+    )
+
+    return RetornoDeConsultaGlicemiasAPI(glicemias=glicemias)
 
 
 @app.post(

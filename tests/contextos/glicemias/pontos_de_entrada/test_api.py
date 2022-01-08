@@ -1,7 +1,7 @@
 import pytest
 
-from datetime import datetime
 from freezegun import freeze_time
+from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 
 from contextos.glicemias.pontos_de_entrada.api import app
@@ -9,6 +9,49 @@ from contextos.glicemias.pontos_de_entrada.api import app
 from contextos.glicemias.dominio.entidades import Glicemia
 
 client = TestClient(app)
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_consultar_glicemias(session):
+    horario_dosagem = datetime.now()
+
+    glicemia_a_criar = [
+        {
+            "valor": 108,
+            "observacoes": "poxa ein teste de integracao nao",
+            "primeira_do_dia": True,
+            "horario_dosagem": str(horario_dosagem + timedelta(hours=2)),
+        },
+        {
+            "valor": 98,
+            "observacoes": "",
+            "primeira_do_dia": False,
+            "horario_dosagem": str(horario_dosagem + timedelta(hours=2)),
+        },
+        {
+            "valor": 129,
+            "observacoes": "",
+            "primeira_do_dia": False,
+            "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
+        },
+    ]
+
+    ids_glicemiads_criadas = []
+
+    for glicemia in glicemia_a_criar:
+        response = client.post(
+            "/v1/glicemias",
+            json=glicemia,
+        )
+
+        glicemia_id = response.json().get("id")
+
+        ids_glicemiads_criadas.append(glicemia_id)
+
+    response = client.get("/v1/glicemias")
+
+    assert response.status_code == 201
+    assert list(response.json().get("glicemias")) == 3
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

@@ -24,7 +24,7 @@ from contextos.glicemias.servicos.unidade_de_trabalho import AbstractUnitOfWork
 
 
 class FakeRepo(AbstractRepository):
-    __glicemias: Set[Glicemia] = set()
+    __glicemias: Set[Glicemia]
 
     def __init__(self, glicemias: Optional[Set[Glicemia]] = None):
         if not glicemias:
@@ -89,21 +89,6 @@ def test_criar_glicemia():
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada
 
-    glicemia_esperada = Glicemia(
-        valor=98,
-        primeira_do_dia=True,
-        horario_dosagem=horario_dosagem,
-        observacoes="glicose em jejum",
-        auditoria=Auditoria(
-            criado_por=id_usuario,
-            data_criacao=datetime(2021, 8, 27, 16, 20),
-            ultima_vez_editado_por=None,
-            data_ultima_edicao=None,
-            ativo=True,
-            deletado=False,
-        ),
-    )
-
     assert glicemia_criada.id
     assert glicemia_criada.valor == 98
     assert glicemia_criada.primeira_do_dia is True
@@ -135,6 +120,12 @@ def test_editar_glicemia():
 
     assert uow.committed is True
 
+    assert glicemia_criada.valor == 105
+    assert glicemia_criada.observacoes == "glicose em jejum"
+
+    assert glicemia_criada.auditoria.ultima_vez_editado_por is None
+    assert glicemia_criada.auditoria.data_ultima_edicao is None
+
     with freeze_time(horario_edicao):
         glicemia_editada = editar_glicemia(
             comando=EditarGlicemia(
@@ -150,23 +141,11 @@ def test_editar_glicemia():
             uow=uow,
         )
 
-    glicemia_esperada_apos_edicao = Glicemia(
-        id=glicemia_criada.id,
-        valor=98,
-        primeira_do_dia=True,
-        horario_dosagem=horario_dosagem,
-        observacoes="teste mano afff",
-        auditoria=Auditoria(
-            criado_por=id_usuario,
-            data_criacao=datetime(2021, 8, 27, 16, 20),
-            ultima_vez_editado_por=id_usuario,
-            data_ultima_edicao=horario_edicao,
-            ativo=True,
-            deletado=False,
-        ),
-    )
+    assert glicemia_editada.valor == 98
+    assert glicemia_editada.observacoes == "teste mano afff"
 
-    assert glicemia_editada == glicemia_esperada_apos_edicao
+    assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario
+    assert glicemia_editada.auditoria.data_ultima_edicao == horario_edicao
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

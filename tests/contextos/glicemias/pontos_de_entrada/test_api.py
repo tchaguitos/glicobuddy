@@ -28,15 +28,7 @@ def test_consultar_glicemias(session):
             "primeira_do_dia": False,
             "horario_dosagem": str(horario_dosagem + timedelta(hours=2)),
         },
-        {
-            "valor": 129,
-            "observacoes": "",
-            "primeira_do_dia": False,
-            "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
-        },
     ]
-
-    ids_glicemiads_criadas = []
 
     for glicemia in glicemia_a_criar:
         response = client.post(
@@ -44,14 +36,58 @@ def test_consultar_glicemias(session):
             json=glicemia,
         )
 
-        glicemia_id = response.json().get("id")
+    response = client.get("/v1/glicemias")
 
-        ids_glicemiads_criadas.append(glicemia_id)
+    assert response.status_code == 200
+    assert len(response.json().get("glicemias")) == 2
+
+    client.post(
+        "/v1/glicemias",
+        json={
+            "valor": 129,
+            "observacoes": "",
+            "primeira_do_dia": False,
+            "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
+        },
+    )
 
     response = client.get("/v1/glicemias")
 
     assert response.status_code == 200
     assert len(response.json().get("glicemias")) == 3
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_consultar_glicemias_por_id(session):
+    horario_dosagem = datetime.now()
+
+    response = client.post(
+        "/v1/glicemias",
+        json={
+            "valor": 129,
+            "observacoes": "pós prandial",
+            "primeira_do_dia": False,
+            "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
+        },
+    )
+
+    glicemia_id = response.json().get("id")
+
+    response = client.get(f"/v1/glicemias/{glicemia_id}")
+
+    assert response.status_code == 200
+    assert len(response.json().get("glicemias")) == 1
+
+    glicemia = response.json().get("glicemias")[0]
+
+    assert glicemia.get("id") == glicemia_id
+    assert glicemia.get("valor") == 129
+    assert glicemia.get("observacoes") == "pós prandial"
+    assert glicemia.get("primeira_do_dia") == False
+    assert (
+        glicemia.get("horario_dosagem")
+        == (horario_dosagem + timedelta(hours=4)).isoformat()
+    )
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

@@ -96,6 +96,35 @@ def listar_glicemias() -> List[Glicemia]:
     )
 
 
+@router.get(
+    "/v1/glicemias/{glicemia_id}",
+    status_code=200,
+    response_model=RetornoDeConsultaGlicemiasAPI,
+)
+def consultar_glicemias_por_id(glicemia_id: UUID) -> Glicemia:
+    usuario_id = uuid4()
+
+    uow = SqlAlchemyUnitOfWork()
+
+    glicemia = consultar_glicemia_por_id(
+        glicemia_id=glicemia_id,
+        usuario_id=usuario_id,
+        uow=uow,
+    )
+
+    return RetornoDeConsultaGlicemiasAPI(
+        glicemias=[
+            GlicemiaAPI(
+                id=glicemia.id,
+                valor=glicemia.valor,
+                observacoes=glicemia.observacoes,
+                primeira_do_dia=glicemia.primeira_do_dia,
+                horario_dosagem=glicemia.horario_dosagem,
+            )
+        ]
+    )
+
+
 @router.post(
     "/v1/glicemias",
     status_code=201,

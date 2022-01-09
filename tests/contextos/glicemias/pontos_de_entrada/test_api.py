@@ -4,9 +4,9 @@ from freezegun import freeze_time
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 
-from contextos.glicemias.pontos_de_entrada.api import app
-
 from contextos.glicemias.dominio.entidades import Glicemia
+
+from main import app
 
 client = TestClient(app)
 
@@ -50,8 +50,8 @@ def test_consultar_glicemias(session):
 
     response = client.get("/v1/glicemias")
 
-    assert response.status_code == 201
-    assert list(response.json().get("glicemias")) == 3
+    assert response.status_code == 200
+    assert len(response.json().get("glicemias")) == 3
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

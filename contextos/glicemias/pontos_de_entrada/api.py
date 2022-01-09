@@ -1,8 +1,7 @@
-from uuid import UUID, uuid4
-
 from typing import List
-from fastapi import FastAPI
+from uuid import UUID, uuid4
 from datetime import datetime
+from fastapi import APIRouter
 from pydantic import BaseModel, Extra
 
 from contextos.glicemias.dominio.entidades import Glicemia
@@ -26,7 +25,10 @@ from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlic
 from contextos.glicemias.servicos.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
 
-app = FastAPI()
+router = APIRouter(
+    tags=["glicemias"],
+    responses={404: {"description": "Not found"}},
+)
 
 
 class ValoresParaCriacaoDeGlicemiaAPI(BaseModel):
@@ -53,16 +55,24 @@ class RetornoDeGlicemiasAPI(BaseModel):
     id: UUID
 
 
+class GlicemiaAPI(BaseModel):
+    id: UUID
+    valor: int
+    observacoes: str
+    primeira_do_dia: bool
+    horario_dosagem: datetime
+
+
 class RetornoDeConsultaGlicemiasAPI(BaseModel):
-    glicemias: List[Glicemia]
+    glicemias: List[GlicemiaAPI]
 
 
-@app.get(
+@router.get(
     "/v1/glicemias",
-    response_model=RetornoDeConsultaGlicemiasAPI,
     status_code=200,
+    response_model=RetornoDeConsultaGlicemiasAPI,
 )
-def listar_glicemias():
+def listar_glicemias() -> List[Glicemia]:
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
@@ -72,13 +82,24 @@ def listar_glicemias():
         uow=uow,
     )
 
-    return RetornoDeConsultaGlicemiasAPI(glicemias=glicemias)
+    return RetornoDeConsultaGlicemiasAPI(
+        glicemias=[
+            GlicemiaAPI(
+                id=glicemia.id,
+                valor=glicemia.valor,
+                observacoes=glicemia.observacoes,
+                primeira_do_dia=glicemia.primeira_do_dia,
+                horario_dosagem=glicemia.horario_dosagem,
+            )
+            for glicemia in glicemias
+        ]
+    )
 
 
-@app.post(
+@router.post(
     "/v1/glicemias",
-    response_model=RetornoDeGlicemiasAPI,
     status_code=201,
+    response_model=RetornoDeGlicemiasAPI,
 )
 def cadastrar_glicemia(
     nova_glicemia: ValoresParaCriacaoDeGlicemiaAPI,
@@ -102,10 +123,10 @@ def cadastrar_glicemia(
     return RetornoDeGlicemiasAPI(id=glicemia_criada.id)
 
 
-@app.patch(
+@router.patch(
     "/v1/glicemias/{glicemia_id}",
-    response_model=RetornoDeGlicemiasAPI,
     status_code=200,
+    response_model=RetornoDeGlicemiasAPI,
 )
 def atualizar_glicemia(
     glicemia_id: UUID, novos_valores: ValoresParaEdicaoDeGlicemiaAPI
@@ -132,8 +153,10 @@ def atualizar_glicemia(
     return RetornoDeGlicemiasAPI(id=glicemia_editada.id)
 
 
-@app.delete(
-    "/v1/glicemias/{glicemia_id}", response_model=RetornoDeGlicemiasAPI, status_code=200
+@router.delete(
+    "/v1/glicemias/{glicemia_id}",
+    status_code=200,
+    response_model=RetornoDeGlicemiasAPI,
 )
 def deletar_glicemia(glicemia_id: UUID) -> RetornoDeGlicemiasAPI:
     uow = SqlAlchemyUnitOfWork()

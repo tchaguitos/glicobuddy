@@ -72,7 +72,7 @@ class RetornoDeConsultaGlicemiasAPI(BaseModel):
     status_code=200,
     response_model=RetornoDeConsultaGlicemiasAPI,
 )
-def listar_glicemias() -> List[Glicemia]:
+def listar_glicemias():
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
@@ -101,7 +101,7 @@ def listar_glicemias() -> List[Glicemia]:
     status_code=200,
     response_model=RetornoDeConsultaGlicemiasAPI,
 )
-def consultar_glicemias_por_id(glicemia_id: UUID) -> Glicemia:
+def consultar_glicemias_por_id(glicemia_id: UUID):
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
@@ -132,7 +132,7 @@ def consultar_glicemias_por_id(glicemia_id: UUID) -> Glicemia:
 )
 def cadastrar_glicemia(
     nova_glicemia: ValoresParaCriacaoDeGlicemiaAPI,
-) -> RetornoDeGlicemiasAPI:
+):
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
@@ -159,7 +159,7 @@ def cadastrar_glicemia(
 )
 def atualizar_glicemia(
     glicemia_id: UUID, novos_valores: ValoresParaEdicaoDeGlicemiaAPI
-) -> RetornoDeGlicemiasAPI:
+):
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
@@ -187,7 +187,7 @@ def atualizar_glicemia(
     status_code=200,
     response_model=RetornoDeGlicemiasAPI,
 )
-def deletar_glicemia(glicemia_id: UUID) -> RetornoDeGlicemiasAPI:
+def deletar_glicemia(glicemia_id: UUID):
     uow = SqlAlchemyUnitOfWork()
 
     id_glicemia_removida = remover_glicemia(

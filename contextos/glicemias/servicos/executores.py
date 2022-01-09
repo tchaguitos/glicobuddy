@@ -9,7 +9,7 @@ from contextos.glicemias.dominio.comandos import (
 from contextos.glicemias.servicos.unidade_de_trabalho import AbstractUnitOfWork
 
 
-def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork):
+def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
     with uow:
         nova_glicemia = Glicemia.criar(
             valor=comando.valor,
@@ -25,7 +25,7 @@ def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork):
     return nova_glicemia
 
 
-def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork):
+def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
 
     with uow:
         glicemia = uow.repo.consultar_por_id(id=comando.glicemia_id)

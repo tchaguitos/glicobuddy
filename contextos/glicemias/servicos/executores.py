@@ -6,44 +6,46 @@ from contextos.glicemias.dominio.comandos import (
     RemoverGlicemia,
 )
 
-from contextos.glicemias.repositorio.repo_dominio import SqlAlchemyRepository
+from contextos.glicemias.servicos.unidade_de_trabalho import AbstractUnitOfWork
 
 
-def criar_glicemia(comando: CriarGlicemia, repo: SqlAlchemyRepository, session):
-    glicemia_criada = Glicemia.criar(
-        valor=comando.valor,
-        horario_dosagem=comando.horario_dosagem,
-        observacoes=comando.observacoes,
-        primeira_do_dia=comando.primeira_do_dia,
-        criado_por=comando.criado_por,
-    )
+def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
+    with uow:
+        nova_glicemia = Glicemia.criar(
+            valor=comando.valor,
+            horario_dosagem=comando.horario_dosagem,
+            observacoes=comando.observacoes,
+            primeira_do_dia=comando.primeira_do_dia,
+            criado_por=comando.criado_por,
+        )
 
-    repo.adicionar(glicemia_criada)
-    session.commit()
+        uow.repo.adicionar(nova_glicemia)
+        uow.commit()
 
-    return glicemia_criada
+    return nova_glicemia
 
 
-def editar_glicemia(comando: EditarGlicemia, repo: SqlAlchemyRepository, session):
-    glicemia = repo.consultar_por_id(id=comando.glicemia_id)
+def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
 
-    glicemia_editada = glicemia.editar(
-        editado_por=comando.editado_por,
-        novos_valores=comando.novos_valores,
-    )
+    with uow:
+        glicemia = uow.repo.consultar_por_id(id=comando.glicemia_id)
 
-    repo.atualizar(glicemia_editada)
-    session.commit()
+        glicemia_editada = glicemia.editar(
+            editado_por=comando.editado_por,
+            novos_valores=comando.novos_valores,
+        )
+
+        uow.repo.atualizar(glicemia_editada)
+        uow.commit()
 
     return glicemia_editada
 
 
-def remover_glicemia(
-    comando: RemoverGlicemia, repo: SqlAlchemyRepository, session
-) -> UUID:
-    glicemia = repo.consultar_por_id(id=comando.glicemia_id)
+def remover_glicemia(comando: RemoverGlicemia, uow: AbstractUnitOfWork) -> UUID:
+    with uow:
+        glicemia = uow.repo.consultar_por_id(id=comando.glicemia_id)
 
-    repo.remover(glicemia)
-    session.commit()
+        uow.repo.remover(glicemia)
+        uow.commit()
 
     return glicemia.id

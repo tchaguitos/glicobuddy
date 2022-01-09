@@ -1,14 +1,10 @@
 import pytest
 
-from config import get_session
-
-from contextos.glicemias.repositorio.orm import start_mappers
+from config import get_session_factory
 
 
 @pytest.fixture(scope="session")
 def session():
-    start_mappers()
-
-    session = get_session(is_test=True)
+    session = get_session_factory(is_test=True)
 
     yield session

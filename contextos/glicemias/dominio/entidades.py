@@ -2,8 +2,8 @@ from typing import Optional
 from uuid import UUID, uuid4
 from datetime import datetime
 
-from dataclasses import dataclass, asdict, replace
 from dataclass_type_validator import dataclass_validate
+from dataclasses import dataclass, asdict, replace, field
 
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
@@ -37,7 +37,7 @@ class Glicemia:
     primeira_do_dia: bool
     horario_dosagem: datetime
     auditoria: Auditoria
-    id: Optional[UUID] = None  # TODO: melhorar modelagem
+    id: UUID = field(init=False, default_factory=uuid4)
 
     class ValorDeGlicemiaInvalido(Exception):
         pass
@@ -62,7 +62,6 @@ class Glicemia:
     ):
         """"""
         return cls(
-            id=uuid4(),
             valor=valor,
             horario_dosagem=horario_dosagem,
             observacoes=observacoes,

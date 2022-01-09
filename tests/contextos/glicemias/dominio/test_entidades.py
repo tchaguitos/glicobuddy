@@ -88,25 +88,14 @@ def test_editar_glicemia():
         criado_por=id_usuario,
     )
 
-    glicemia_esperada_apos_edicao = Glicemia(
-        id=glicemia_criada.id,
-        valor=88,
-        primeira_do_dia=True,
-        horario_dosagem=horario_dosagem,
-        observacoes="glicose em jejum",
-        auditoria=Auditoria(
-            criado_por=id_usuario,
-            data_criacao=horario_criacao,
-            ultima_vez_editado_por=id_usuario,
-            data_ultima_edicao=horario_edicao,
-            ativo=True,
-            deletado=False,
-        ),
-    )
+    assert glicemia_criada.valor == 120
+    assert glicemia_criada.observacoes == "primeira glicemia do dia"
+
+    assert glicemia_criada.auditoria.ultima_vez_editado_por is None
+    assert glicemia_criada.auditoria.data_ultima_edicao is None
 
     with freeze_time(horario_edicao):
-        # mudou o valor e a descricao
-        glicemia_apos_edicao = glicemia_criada.editar(
+        glicemia_editada = glicemia_criada.editar(
             novos_valores=ValoresParaEdicaoDeGlicemia(
                 valor=88,
                 primeira_do_dia=True,
@@ -116,7 +105,13 @@ def test_editar_glicemia():
             editado_por=id_usuario,
         )
 
-    assert glicemia_apos_edicao == glicemia_esperada_apos_edicao
+    assert glicemia_editada.valor == 88
+    assert glicemia_editada.observacoes == "glicose em jejum"
+
+    assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario
+    assert glicemia_editada.auditoria.data_ultima_edicao == horario_edicao
+
+    # TODO: add mais casos
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

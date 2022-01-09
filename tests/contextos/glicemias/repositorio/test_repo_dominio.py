@@ -25,9 +25,7 @@ def test_repositorio_adicionar_glicemia(session):
     repo.adicionar(glicemia)
     session.commit()
 
-    rows = session.execute(
-        "SELECT * FROM glicemia"
-    )
+    rows = session.execute("SELECT * FROM glicemia")
 
     registros = list(rows)
 
@@ -52,20 +50,17 @@ def test_repositorio_remover_glicemia(session):
     repo.adicionar(glicemia)
     session.commit()
 
-    rows = session.execute(
-        "SELECT * FROM glicemia"
-    )
+    rows = session.execute("SELECT * FROM glicemia")
 
     assert len(list(rows)) == 1
 
     repo.remover(glicemia)
     session.commit()
 
-    rows = session.execute(
-        "SELECT * FROM glicemia"
-    )
+    rows = session.execute("SELECT * FROM glicemia")
 
     assert len(list(rows)) == 0
+
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_repositorio_consultar_glicemias(session):
@@ -87,7 +82,6 @@ def test_repositorio_consultar_glicemias(session):
     registros_no_banco = repo.consultar_todos()
 
     assert len(registros_no_banco) == 1
-
 
     glicemia_2 = Glicemia.criar(
         valor=87,

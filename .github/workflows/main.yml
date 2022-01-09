@@ -38,4 +38,4 @@ jobs:
 
     - name: Verificando cobertura de testes
       run: |
-        pytest --cov=contextos/ tests/
+        pytest --cov=contextos/ tests/ --cov-fail-under=90

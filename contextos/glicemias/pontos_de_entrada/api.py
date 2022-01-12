@@ -3,6 +3,7 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from fastapi import APIRouter
 from pydantic import BaseModel, Extra
+from fastapi import APIRouter, HTTPException
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -111,6 +112,11 @@ def consultar_glicemias_por_id(glicemia_id: UUID):
         usuario_id=usuario_id,
         uow=uow,
     )
+
+    if not glicemia:
+        raise HTTPException(
+            status_code=404, detail="Não existe glicemia com o ID informado"
+        )
 
     return RetornoDeConsultaGlicemiasAPI(
         glicemias=[

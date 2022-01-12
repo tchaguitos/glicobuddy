@@ -1,8 +1,11 @@
 from typing import List
 from uuid import UUID, uuid4
 from datetime import datetime
+from fastapi import APIRouter
 from pydantic import BaseModel, Extra
 from fastapi import APIRouter, HTTPException
+
+from contextos.glicemias.dominio.entidades import Glicemia
 
 from contextos.glicemias.dominio.comandos import (
     CriarGlicemia,

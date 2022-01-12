@@ -39,4 +39,4 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(Glicemia).all()
 
     def consultar_por_id(self, id: UUID) -> Glicemia:
-        return self.session.query(Glicemia).filter_by(id=id).one()
+        return self.session.query(Glicemia).filter_by(id=id).first()

@@ -120,6 +120,10 @@ def test_editar_glicemia():
 
     assert uow.committed is True
 
+    registros_no_banco = list(uow.repo.consultar_todos())
+
+    assert len(registros_no_banco) == 1
+
     assert glicemia_criada.valor == 105
     assert glicemia_criada.observacoes == "glicose em jejum"
 
@@ -146,6 +150,10 @@ def test_editar_glicemia():
 
     assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario
     assert glicemia_editada.auditoria.data_ultima_edicao == horario_edicao
+
+    registros_no_banco = list(uow.repo.consultar_todos())
+
+    assert len(registros_no_banco) == 1
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

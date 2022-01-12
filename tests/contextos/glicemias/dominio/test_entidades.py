@@ -88,6 +88,7 @@ def test_editar_glicemia():
         criado_por=id_usuario,
     )
 
+    assert glicemia_criada.id
     assert glicemia_criada.valor == 120
     assert glicemia_criada.observacoes == "primeira glicemia do dia"
 
@@ -106,6 +107,7 @@ def test_editar_glicemia():
         )
 
     assert glicemia_editada.valor == 88
+    assert glicemia_editada.id == glicemia_criada.id
     assert glicemia_editada.observacoes == "glicose em jejum"
 
     assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario

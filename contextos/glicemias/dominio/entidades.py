@@ -104,9 +104,13 @@ class Glicemia:
         novos_valores: ValoresParaEdicaoDeGlicemia,
     ):
         """"""
-        novos_valores_glicemia = asdict(novos_valores)
 
-        self = replace(self, **novos_valores_glicemia)
+        glicemia_atualizada = replace(self, **asdict(novos_valores))
+
+        self.valor = glicemia_atualizada.valor
+        self.observacoes = glicemia_atualizada.observacoes
+        self.primeira_do_dia = glicemia_atualizada.primeira_do_dia
+        self.horario_dosagem = glicemia_atualizada.horario_dosagem
 
         self.__atualizar_valores_auditoria(editado_por=editado_por)
 

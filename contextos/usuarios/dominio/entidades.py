@@ -37,6 +37,9 @@ class Usuario:
     id: UUID = field(init=False, default_factory=uuid4)
     data_criacao_utc: datetime  # TODO: criar contexto de auditoria?
 
+    def __hash__(self):
+        return hash(self.id)
+
     @classmethod
     def criar(
         cls,

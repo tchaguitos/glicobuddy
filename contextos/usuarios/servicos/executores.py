@@ -5,6 +5,15 @@ from contextos.usuarios.dominio.entidades import Usuario, Email
 
 def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
     with uow:
+        ja_existe_usuario_com_o_email = uow.repo.consultar_por_email(
+            email=Email(comando.email)
+        )
+
+        if ja_existe_usuario_com_o_email:
+            raise Usuario.UsuarioInvalido(
+                "Não é possível criar um novo usuário com este e-mail."
+            )
+
         novo_usuario = Usuario.criar(
             email=Email(comando.email),
             senha=comando.senha,

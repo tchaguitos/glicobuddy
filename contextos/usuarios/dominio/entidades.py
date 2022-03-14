@@ -40,6 +40,9 @@ class Usuario:
     def __hash__(self):
         return hash(self.id)
 
+    class UsuarioInvalido(Exception):
+        pass
+
     @classmethod
     def criar(
         cls,

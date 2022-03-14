@@ -1,9 +1,10 @@
-from datetime import date, datetime
 from uuid import UUID, uuid4
-from typing import Optional
+from datetime import date, datetime
 
 from dataclasses import dataclass, field
 from dataclass_type_validator import dataclass_validate
+
+from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
 class Email(str):
@@ -43,7 +44,7 @@ class Usuario:
         senha: str,
         nome_completo: str,
         data_de_nascimento: date,
-    ):
+    ) -> "Usuario":
         return cls(
             email=email,
             senha=senha,
@@ -51,3 +52,12 @@ class Usuario:
             data_de_nascimento=data_de_nascimento,
             data_criacao_utc=datetime.utcnow(),
         )
+
+    def editar(
+        self,
+        valores_para_edicao: ValoresParaEdicaoDeUsuario,
+    ) -> "Usuario":
+        self.nome_completo = valores_para_edicao.nome_completo
+        self.data_de_nascimento = valores_para_edicao.data_de_nascimento
+
+        return self

@@ -8,6 +8,9 @@ from contextos.usuarios.dominio.entidades import (
     Email,
     Usuario,
 )
+from contextos.usuarios.dominio.objetos_de_valor import (
+    ValoresParaEdicaoDeUsuario,
+)
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -47,3 +50,27 @@ def test_criar_usuario():
     assert usuario_criado.data_de_nascimento == usuario_esperado.data_de_nascimento
 
     assert usuario_criado.data_criacao_utc == horario_atual_utc
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_editar_usuario():
+    usuario = Usuario.criar(
+        email=Email("tchaguitos@gmail.com"),
+        senha="abc123",
+        nome_completo="Thiago Brasil",
+        data_de_nascimento=date(1995, 8, 27),
+    )
+
+    assert usuario.nome_completo == "Thiago Brasil"
+    assert usuario.data_de_nascimento == date(1995, 8, 27)
+
+    usuario_editado = usuario.editar(
+        valores_para_edicao=ValoresParaEdicaoDeUsuario(
+            nome_completo="Teste AAAAA",
+            data_de_nascimento=date(1960, 8, 27),
+        )
+    )
+
+    assert usuario_editado
+    assert usuario_editado.nome_completo == "Teste AAAAA"
+    assert usuario_editado.data_de_nascimento == date(1960, 8, 27)

@@ -3,21 +3,27 @@ import abc
 from config import get_session_factory
 from sqlalchemy.orm.session import Session
 
-from contextos.glicemias.repositorio.repo_dominio import (
-    AbstractRepository,
-    SqlAlchemyRepository,
-)
+from libs.dominio import Dominio
+from libs.repositorio import AbstractRepository, SqlAlchemyRepository
 
 
 class AbstractUnitOfWork(abc.ABC):
-    repo: AbstractRepository
-    committed: bool = False
+    committed: bool
+    repo_dominio: AbstractRepository
+    classe_repo_dominio: AbstractRepository
 
     def __enter__(self):
         return self
 
     def __exit__(self, *args, **kwargs):
-        self.rollback()
+        pass
+
+    def __call__(self, dominio):
+        assert dominio, "o dominio deve ser passado para utilizar a unidade de trabalho"
+
+        self.classe_repo_dominio = dominio.value[0]
+
+        return self
 
     @abc.abstractmethod
     def commit(self):
@@ -34,7 +40,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self):
         self.session: Session = self.session_factory()
-        self.repo: SqlAlchemyRepository = SqlAlchemyRepository(self.session)
+        self.repo_dominio = self.classe_repo_dominio(self.session)
 
         return super().__enter__()
 

@@ -16,9 +16,9 @@ class AbstractUnitOfWork(abc.ABC):
         return self
 
     def __exit__(self, *args, **kwargs):
-        pass
+        self.rollback()
 
-    def __call__(self, dominio):
+    def __call__(self, dominio: Dominio):
         assert dominio, "o dominio deve ser passado para utilizar a unidade de trabalho"
 
         self.classe_repo_dominio = dominio.value[0]
@@ -40,7 +40,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     def __enter__(self):
         self.session: Session = self.session_factory()
-        self.repo_dominio = self.classe_repo_dominio(self.session)
+        self.repo_dominio: SqlAlchemyRepository = self.classe_repo_dominio(self.session)
 
         return super().__enter__()
 

@@ -4,7 +4,7 @@ from freezegun import freeze_time
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
-from contextos.glicemias.repositorio import repo_dominio
+from contextos.glicemias.repositorio.repo_dominio import RepoDominioGlicemias
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -12,7 +12,7 @@ def test_repositorio_adicionar_glicemia(session):
     # TODO: criar forma melhor de limpar o db para os testes
     session.execute("DELETE FROM glicemia")
 
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    repo = RepoDominioGlicemias(session)
 
     glicemia = Glicemia.criar(
         valor=120,
@@ -37,7 +37,7 @@ def test_repositorio_adicionar_glicemia(session):
 def test_repositorio_remover_glicemia(session):
     session.execute("DELETE FROM glicemia")
 
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    repo = RepoDominioGlicemias(session)
 
     glicemia = Glicemia.criar(
         valor=120,
@@ -66,7 +66,7 @@ def test_repositorio_remover_glicemia(session):
 def test_repositorio_consultar_glicemias(session):
     session.execute("DELETE FROM glicemia")
 
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    repo = RepoDominioGlicemias(session)
 
     glicemia_1 = Glicemia.criar(
         valor=120,
@@ -112,7 +112,7 @@ def test_repositorio_consultar_glicemias(session):
 def test_repositorio_consultar_glicemia_por_id(session):
     session.execute("DELETE FROM glicemia")
 
-    repo = repo_dominio.SqlAlchemyRepository(session)
+    repo = RepoDominioGlicemias(session)
 
     glicemia_criada = Glicemia.criar(
         valor=120,

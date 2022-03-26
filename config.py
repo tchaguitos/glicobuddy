@@ -3,18 +3,27 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from contextos.glicemias.repositorio.orm import metadata, start_mappers
+from libs.orm import metadata
+
+
+def start_mappers():
+    from contextos.usuarios.repositorio.orm import mapper_usuario
+    from contextos.glicemias.repositorio.orm import mapper_glicemia
 
 
 def get_session_factory(engine=None, is_test: bool = False):
-    if not engine:
-        engine = create_engine(get_postgres_uri())
+    """"""
+    engine = create_engine(
+        get_postgres_uri(),
+        isolation_level="REPEATABLE READ",
+    )
 
+    start_mappers()
+
+    # TODO: ajustar a remoção e criação das tabelas no ambiente de teste
     if is_test is True:
         metadata.drop_all(engine)
         metadata.create_all(engine)
-
-    start_mappers()
 
     return sessionmaker(bind=engine, expire_on_commit=False)()
 

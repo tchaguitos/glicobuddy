@@ -1,8 +1,9 @@
 import pytest
+from uuid import uuid4
+from fastapi.testclient import TestClient
 
 from freezegun import freeze_time
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -88,6 +89,11 @@ def test_consultar_glicemias_por_id(session):
         glicemia.get("horario_dosagem")
         == (horario_dosagem + timedelta(hours=4)).isoformat()
     )
+
+    response = client.get(f"/v1/glicemias/{uuid4()}")
+
+    assert response.status_code == 404
+    assert response.json().get("detail") == "Não existe glicemia com o ID informado"
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

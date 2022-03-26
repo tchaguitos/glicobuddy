@@ -1,7 +1,6 @@
 import pytest
 
 from uuid import UUID
-from uuid import uuid4
 from typing import Set, Optional
 from freezegun import freeze_time
 from datetime import datetime, date
@@ -9,9 +8,10 @@ from datetime import datetime, date
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
 
-from contextos.usuarios.dominio.comandos import CriarUsuario
 from contextos.usuarios.dominio.entidades import Usuario, Email
-from contextos.usuarios.servicos.executores import criar_usuario
+from contextos.usuarios.dominio.comandos import CriarUsuario, EditarUsuario
+from contextos.usuarios.servicos.executores import criar_usuario, editar_usuario
+from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
 class FakeRepo(RepoAbstratoUsuarios):
@@ -109,3 +109,39 @@ def test_criar_usuario_com_email_ja_existente():
         )
 
         assert str(e.value) == "Não é possível criar um novo usuário com este e-mail."
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_editar_usuario():
+    uow = FakeUOW()
+
+    usuario_criado = criar_usuario(
+        comando=CriarUsuario(
+            email=Email("tchaguitos@gmail.com"),
+            senha="abc123",
+            nome_completo="Thiago Brasil",
+            data_de_nascimento=date(1995, 8, 27),
+        ),
+        uow=uow,
+    )
+
+    usuario = uow.repo_dominio.consultar_por_id(id=usuario_criado.id)
+
+    assert usuario.id == usuario_criado.id
+    assert usuario.nome_completo == "Thiago Brasil"
+    assert usuario.data_de_nascimento == date(1995, 8, 27)
+
+    usuario_editado = editar_usuario(
+        comando=EditarUsuario(
+            usuario_id=usuario_criado.id,
+            novos_valores=ValoresParaEdicaoDeUsuario(
+                nome_completo="Bill Cypher", data_de_nascimento=date(1985, 9, 15)
+            ),
+            editado_por=usuario_criado.id,
+        ),
+        uow=uow,
+    )
+
+    assert usuario_editado.id == usuario_criado.id
+    assert usuario_editado.nome_completo == "Bill Cypher"
+    assert usuario_editado.data_de_nascimento == date(1985, 9, 15)

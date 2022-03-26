@@ -1,6 +1,6 @@
 from libs.unidade_de_trabalho import AbstractUnitOfWork
-from contextos.usuarios.dominio.comandos import CriarUsuario
 from contextos.usuarios.dominio.entidades import Usuario, Email
+from contextos.usuarios.dominio.comandos import CriarUsuario, EditarUsuario
 
 from libs.dominio import Dominio
 
@@ -27,3 +27,15 @@ def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
         uow.commit()
 
     return novo_usuario
+
+
+def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
+    with uow(Dominio.usuarios):
+        usuario: Usuario = uow.repo_dominio.consultar_por_id(id=comando.usuario_id)
+
+        usuario_editado = usuario.editar(valores_para_edicao=comando.novos_valores)
+
+        uow.repo_dominio.atualizar(usuario_editado)
+        uow.commit()
+
+    return usuario_editado

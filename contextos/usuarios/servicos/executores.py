@@ -2,10 +2,12 @@ from libs.unidade_de_trabalho import AbstractUnitOfWork
 from contextos.usuarios.dominio.comandos import CriarUsuario
 from contextos.usuarios.dominio.entidades import Usuario, Email
 
+from libs.dominio import Dominio
+
 
 def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
-    with uow:
-        ja_existe_usuario_com_o_email = uow.repo.consultar_por_email(
+    with uow(Dominio.usuarios):
+        ja_existe_usuario_com_o_email = uow.repo_dominio.consultar_por_email(
             email=Email(comando.email)
         )
 
@@ -21,7 +23,7 @@ def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
             data_de_nascimento=comando.data_de_nascimento,
         )
 
-        uow.repo.adicionar(novo_usuario)
+        uow.repo_dominio.adicionar(novo_usuario)
         uow.commit()
 
     return novo_usuario

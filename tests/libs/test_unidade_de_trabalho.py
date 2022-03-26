@@ -6,6 +6,7 @@ from libs.repositorio import AbstractRepository
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork, SqlAlchemyUnitOfWork
 
+from contextos.usuarios.repositorio.repo_dominio import RepoDominioUsuarios
 from contextos.glicemias.repositorio.repo_dominio import RepoDominioGlicemias
 
 
@@ -47,6 +48,13 @@ def test_unidade_de_trabalho_abstrata():
         assert uow.committed
 
     with pytest.raises(Exception) as e:
+        with uow:
+            assert (
+                str(e.value)
+                == "o dominio deve ser passado para utilizar a unidade de trabalho"
+            )
+
+    with pytest.raises(Exception) as e:
         with uow():
             assert (
                 str(e.value)
@@ -67,8 +75,19 @@ def test_unidade_de_trabalho_abstrata_sql():
         assert isinstance(uow.repo_dominio, RepoDominioGlicemias)
 
     with uow(Dominio.usuarios):
+        assert uow.classe_repo_dominio
+        assert isinstance(uow.repo_dominio, RepoDominioUsuarios)
+
         uow.commit()
+
         assert uow.committed
+
+    with pytest.raises(Exception) as e:
+        with uow:
+            assert (
+                str(e.value)
+                == "o dominio deve ser passado para utilizar a unidade de trabalho"
+            )
 
     with pytest.raises(Exception) as e:
         with uow():

@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from typing import Set, Optional
 from freezegun import freeze_time
 
+from libs.unidade_de_trabalho import AbstractUnitOfWork
+
 from contextos.glicemias.dominio.entidades import Glicemia
 
 from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
@@ -12,12 +14,10 @@ from contextos.glicemias.servicos.visualizadores import (
     consultar_glicemia_por_id,
 )
 
-from contextos.glicemias.repositorio.repo_dominio import AbstractRepository
-from contextos.glicemias.servicos.unidade_de_trabalho import AbstractUnitOfWork
+from contextos.glicemias.repositorio.repo_dominio import RepoAbstratoGlicemias
 
 
-# TODO: criar fixture ou algo do tipo
-class FakeRepo(AbstractRepository):
+class FakeRepo(RepoAbstratoGlicemias):
     __glicemias: Set[Glicemia]
 
     def __init__(self, glicemias: Optional[Set[Glicemia]] = None):
@@ -46,7 +46,7 @@ class FakeRepo(AbstractRepository):
 
 class FakeUOW(AbstractUnitOfWork):
     def __init__(self):
-        self.repo = FakeRepo(set())
+        self.repo_dominio = FakeRepo(set())
         self.committed = False
 
     def commit(self):
@@ -97,7 +97,7 @@ def test_consultar_glicemias():
     ]
 
     for glicemia in glicemias_esperadas:
-        uow.repo.adicionar(glicemia)
+        uow.repo_dominio.adicionar(glicemia)
 
     glicemias = list(consultar_glicemias(usuario_id=usuario_id, uow=uow))
 
@@ -120,7 +120,7 @@ def test_consultar_glicemias():
             deletado=False,
         ),
     )
-    uow.repo.adicionar(nova_glicemia)
+    uow.repo_dominio.adicionar(nova_glicemia)
 
     glicemias = list(consultar_glicemias(usuario_id=usuario_id, uow=uow))
 
@@ -184,7 +184,7 @@ def test_consultar_glicemia_por_id():
     ]
 
     for glicemia in glicemias_esperadas:
-        uow.repo.adicionar(glicemia)
+        uow.repo_dominio.adicionar(glicemia)
 
     glicemia_esperada = glicemias_esperadas[0]
 

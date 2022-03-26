@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Extra
 from fastapi import APIRouter, HTTPException
 
-from contextos.glicemias.dominio.entidades import Glicemia
+from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
 from contextos.glicemias.dominio.comandos import (
     CriarGlicemia,
@@ -22,9 +22,6 @@ from contextos.glicemias.servicos.visualizadores import (
     consultar_glicemia_por_id,
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
-
-from contextos.glicemias.servicos.unidade_de_trabalho import SqlAlchemyUnitOfWork
-
 
 router = APIRouter(
     tags=["glicemias"],

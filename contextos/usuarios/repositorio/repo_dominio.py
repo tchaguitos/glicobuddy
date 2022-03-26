@@ -1,36 +1,32 @@
-import abc
-
 from uuid import UUID
 from typing import Iterator
+
+from libs.repositorio import SqlAlchemyRepository
+
 from contextos.usuarios.dominio.entidades import (
     Email,
     Usuario,
 )
 
 
-class AbstractRepository(abc.ABC):
-    @abc.abstractclassmethod
+class RepoAbstratoUsuarios(SqlAlchemyRepository):
     def adicionar(self, usuario: Usuario):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def remover(self, usuario: Usuario):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def consultar_todos(self):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def consultar_por_id(self, id: UUID) -> Usuario:
         raise NotImplementedError
 
-    @abc.abstractmethod
     def consultar_por_email(self, email: Email) -> Usuario:
         raise NotImplementedError
 
 
-class SqlAlchemyRepository(AbstractRepository):
+class RepoDominioUsuarios(RepoAbstratoUsuarios):
     def __init__(self, session):
         self.session = session
 

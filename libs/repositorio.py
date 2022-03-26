@@ -25,6 +25,5 @@ class SqlAlchemyRepository(abc.ABC):
     def __init__(self, session):
         self.session = session
 
-    @abc.abstractmethod
     def __exit__(self):
         raise NotImplementedError

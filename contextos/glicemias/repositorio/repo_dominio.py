@@ -1,28 +1,26 @@
-import abc
 from uuid import UUID
 from typing import Iterator
+
+from libs.repositorio import SqlAlchemyRepository
+
 from contextos.glicemias.dominio.entidades import Glicemia
 
 
-class AbstractRepository(abc.ABC):
-    @abc.abstractclassmethod
+class RepoAbstratoGlicemias(SqlAlchemyRepository):
     def adicionar(self, glicemia: Glicemia):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def remover(self, glicemia: Glicemia):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def consultar_todos(self):
         raise NotImplementedError
 
-    @abc.abstractmethod
     def consultar_por_id(self, id: UUID) -> Glicemia:
         raise NotImplementedError
 
 
-class SqlAlchemyRepository(AbstractRepository):
+class RepoDominioGlicemias(RepoAbstratoGlicemias):
     def __init__(self, session):
         self.session = session
 

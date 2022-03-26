@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy.orm import registry, composite
+from sqlalchemy.orm import composite
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import (
     Table,
@@ -10,10 +10,10 @@ from sqlalchemy import (
     DateTime,
 )
 
+from libs.orm import mapper, metadata
+
 from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
 
-mapper = registry()
-metadata = mapper.metadata
 
 glicemia = Table(
     "glicemia",
@@ -46,7 +46,3 @@ mapper_glicemia = mapper.map_imperatively(
         )
     },
 )
-
-
-def start_mappers():
-    mapper_glicemia

@@ -5,7 +5,7 @@ test:
 	pytest -vv tests/
 
 coverage:
-	pytest --cov=contextos/ tests/
+	pytest --cov=tests/
 
 coverage-report:
 	pytest tests --cov=. --cov-report html --cov-append --disable-warnings

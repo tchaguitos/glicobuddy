@@ -1,8 +1,10 @@
+from uuid import UUID
 from datetime import date
 from dataclasses import dataclass
 from dataclass_type_validator import dataclass_validate
 
 from contextos.usuarios.dominio.entidades import Email
+from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
 @dataclass_validate
@@ -12,3 +14,11 @@ class CriarUsuario:
     senha: str
     nome_completo: str
     data_de_nascimento: date
+
+
+@dataclass_validate
+@dataclass(frozen=True)
+class EditarUsuario:
+    usuario_id: UUID
+    novos_valores: ValoresParaEdicaoDeUsuario
+    editado_por: UUID

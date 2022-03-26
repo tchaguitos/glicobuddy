@@ -22,7 +22,8 @@ class AbstractUnitOfWork(abc.ABC):
         return self
 
     def __exit__(self, *args, **kwargs):
-        self.rollback()
+        # self.rollback() TODO: ajustar exception ao buscar registros pela api
+        pass
 
     def __call__(self, dominio: Dominio):
         assert dominio, "o dominio deve ser passado para utilizar a unidade de trabalho"

@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import date
-from fastapi import APIRouter
 from pydantic import BaseModel, Extra
+from fastapi import APIRouter, HTTPException
 
 from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
@@ -9,6 +9,8 @@ from contextos.usuarios.dominio.entidades import Email
 from contextos.usuarios.dominio.comandos import CriarUsuario, EditarUsuario
 from contextos.usuarios.servicos.executores import criar_usuario, editar_usuario
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
+
+from contextos.usuarios.servicos.visualizadores import consultar_usuario_por_id
 
 router = APIRouter(
     tags=["usuários"],
@@ -36,6 +38,13 @@ class ValoresParaEdicaoDeUsuarioAPI(BaseModel):
 
 class RetornoDeUsuariosAPI(BaseModel):
     id: UUID
+
+
+class UsuarioAPI(BaseModel):
+    id: UUID
+    email: Email
+    nome_completo: str
+    data_de_nascimento: date
 
 
 @router.post(
@@ -83,3 +92,29 @@ def atualizar_usuario(usuario_id: UUID, novos_valores: ValoresParaEdicaoDeUsuari
     )
 
     return RetornoDeUsuariosAPI(id=usuario_editado.id)
+
+
+@router.get(
+    "/v1/usuarios/{usuario_id}",
+    status_code=200,
+    response_model=UsuarioAPI,
+)
+def consultar_usuarios_por_id(usuario_id: UUID):
+    uow = SqlAlchemyUnitOfWork()
+
+    usuario = consultar_usuario_por_id(
+        uow=uow,
+        usuario_id=usuario_id,
+    )
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404, detail="Não existe usuario com o ID informado"
+        )
+
+    return UsuarioAPI(
+        id=usuario.id,
+        email=usuario.email,
+        nome_completo=usuario.nome_completo,
+        data_de_nascimento=usuario.data_de_nascimento,
+    )

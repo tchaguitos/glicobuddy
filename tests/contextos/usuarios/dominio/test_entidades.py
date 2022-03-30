@@ -74,3 +74,21 @@ def test_editar_usuario():
     assert usuario_editado
     assert usuario_editado.nome_completo == "Teste AAAAA"
     assert usuario_editado.data_de_nascimento == date(1960, 8, 27)
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_alterar_email_usuario():
+    usuario = Usuario.criar(
+        email=Email("tchaguitos@teste.com"),
+        senha="abc123",
+        nome_completo="Thiago Brasil",
+        data_de_nascimento=date(1995, 8, 27),
+    )
+
+    assert usuario.email == Email("tchaguitos@teste.com")
+
+    usuario = usuario.alterar_email(
+        email=Email("tchaguitos@gmail.com"),
+    )
+
+    assert usuario.email == Email("tchaguitos@gmail.com")

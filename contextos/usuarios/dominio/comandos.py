@@ -22,3 +22,10 @@ class EditarUsuario:
     usuario_id: UUID
     novos_valores: ValoresParaEdicaoDeUsuario
     editado_por: UUID
+
+
+@dataclass_validate
+@dataclass(frozen=True)
+class AlterarEmailDoUsuario:
+    usuario_id: UUID
+    novo_email: Email

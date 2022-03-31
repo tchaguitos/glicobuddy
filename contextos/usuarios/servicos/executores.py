@@ -62,4 +62,7 @@ def alterar_email_do_usuario(
 
         usuario_alterado = usuario.alterar_email(email=Email(comando.novo_email))
 
+        uow.repo_dominio.atualizar(usuario_alterado)
+        uow.commit()
+
     return usuario_alterado

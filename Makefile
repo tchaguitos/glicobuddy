@@ -2,10 +2,10 @@ run:
 	uvicorn main:app --reload
 
 test:
-	pytest -vv tests/
+	pytest -vv contextos/ tests/
 
 coverage:
-	pytest --cov=tests/
+	pytest --cov=contextos/ --cov-fail-under=90
 
 coverage-report:
-	pytest tests --cov=. --cov-report html --cov-append --disable-warnings
+	pytest contextos/ tests/ --cov=. --cov-report html --cov-append --disable-warnings

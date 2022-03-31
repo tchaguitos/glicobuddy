@@ -34,4 +34,4 @@ jobs:
 
     - name: Executando testes e verificando cobertura de testes
       run: |
-        pytest --cov=contextos/ --cov-fail-under=90
+        pytest --cov=libs/ --cov=contextos/ --cov-fail-under=90

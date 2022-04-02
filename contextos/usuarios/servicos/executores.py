@@ -1,6 +1,10 @@
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from contextos.usuarios.dominio.entidades import Usuario, Email
-from contextos.usuarios.dominio.comandos import CriarUsuario, EditarUsuario
+from contextos.usuarios.dominio.comandos import (
+    CriarUsuario,
+    EditarUsuario,
+    AlterarEmailDoUsuario,
+)
 
 from libs.dominio import Dominio
 
@@ -39,3 +43,26 @@ def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
         uow.commit()
 
     return usuario_editado
+
+
+def alterar_email_do_usuario(
+    comando: AlterarEmailDoUsuario, uow: AbstractUnitOfWork
+) -> Usuario:
+    with uow(Dominio.usuarios):
+        usuario = uow.repo_dominio.consultar_por_email(email=Email(comando.novo_email))
+
+        # email ja utilizado por usuario com id diferente
+        if usuario and usuario.id != comando.usuario_id:
+            raise Usuario.UsuarioInvalido(
+                "Não é possível criar um novo usuário com este e-mail."
+            )
+
+        if not usuario:
+            usuario = uow.repo_dominio.consultar_por_id(id=comando.usuario_id)
+
+        usuario_alterado = usuario.alterar_email(email=Email(comando.novo_email))
+
+        uow.repo_dominio.atualizar(usuario_alterado)
+        uow.commit()
+
+    return usuario_alterado

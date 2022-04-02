@@ -67,3 +67,8 @@ class Usuario:
         self.data_de_nascimento = valores_para_edicao.data_de_nascimento
 
         return self
+
+    def alterar_email(self, email: Email) -> "Usuario":
+        self.email = email
+        # TODO: lancar evento "email alterado"
+        return self

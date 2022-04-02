@@ -9,8 +9,16 @@ from libs.unidade_de_trabalho import AbstractUnitOfWork
 from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
 
 from contextos.usuarios.dominio.entidades import Usuario, Email
-from contextos.usuarios.dominio.comandos import CriarUsuario, EditarUsuario
-from contextos.usuarios.servicos.executores import criar_usuario, editar_usuario
+from contextos.usuarios.dominio.comandos import (
+    CriarUsuario,
+    EditarUsuario,
+    AlterarEmailDoUsuario,
+)
+from contextos.usuarios.servicos.executores import (
+    criar_usuario,
+    editar_usuario,
+    alterar_email_do_usuario,
+)
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
@@ -145,3 +153,52 @@ def test_editar_usuario():
     assert usuario_editado.id == usuario_criado.id
     assert usuario_editado.nome_completo == "Bill Cypher"
     assert usuario_editado.data_de_nascimento == date(1985, 9, 15)
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_alterar_email_de_usuario():
+    uow = FakeUOW()
+
+    usuario_1 = criar_usuario(
+        comando=CriarUsuario(
+            email=Email("usuario.1@teste.com"),
+            senha="abc123",
+            nome_completo="Usuario 1",
+            data_de_nascimento=date(1995, 8, 27),
+        ),
+        uow=uow,
+    )
+
+    usuario_2 = criar_usuario(
+        comando=CriarUsuario(
+            email=Email("usuario.2@teste.com"),
+            senha="abc123",
+            nome_completo="Usuario 2",
+            data_de_nascimento=date(1990, 8, 27),
+        ),
+        uow=uow,
+    )
+
+    assert usuario_1.email == Email("usuario.1@teste.com")
+
+    usuario_com_email_alterado = alterar_email_do_usuario(
+        comando=AlterarEmailDoUsuario(
+            usuario_id=usuario_1.id,
+            novo_email=Email("tchaguitos@gmail.com"),
+        ),
+        uow=uow,
+    )
+
+    assert usuario_1.id == usuario_com_email_alterado.id
+    assert usuario_com_email_alterado.email == Email("tchaguitos@gmail.com")
+
+    with pytest.raises(Usuario.UsuarioInvalido) as e:
+        usuario_com_email_alterado = alterar_email_do_usuario(
+            comando=AlterarEmailDoUsuario(
+                usuario_id=usuario_2.id,
+                novo_email=Email("tchaguitos@gmail.com"),
+            ),
+            uow=uow,
+        )
+
+        assert str(e.value) == "Não é possível criar um novo usuário com este e-mail."

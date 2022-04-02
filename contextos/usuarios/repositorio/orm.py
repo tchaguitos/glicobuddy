@@ -10,7 +10,7 @@ from sqlalchemy import (
 
 from libs.orm import mapper, metadata
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 
 
 usuario = Table(

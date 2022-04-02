@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from contextos.usuarios.dominio.entidades import Email, Usuario
+from contextos.usuarios.dominio.agregados import Email, Usuario
 
 from main import app
 

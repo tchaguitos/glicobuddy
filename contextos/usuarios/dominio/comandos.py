@@ -3,7 +3,7 @@ from datetime import date
 from dataclasses import dataclass
 from dataclass_type_validator import dataclass_validate
 
-from contextos.usuarios.dominio.entidades import Email
+from contextos.usuarios.dominio.agregados import Email
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 

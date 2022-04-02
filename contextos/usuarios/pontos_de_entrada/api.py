@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 
 from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
-from contextos.usuarios.dominio.entidades import Email
+from contextos.usuarios.dominio.agregados import Email
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
     EditarUsuario,

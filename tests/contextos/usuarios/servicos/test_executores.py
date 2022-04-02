@@ -8,7 +8,7 @@ from datetime import datetime, date
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
 
-from contextos.usuarios.dominio.entidades import Usuario, Email
+from contextos.usuarios.dominio.agregados import Usuario, Email
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
     EditarUsuario,

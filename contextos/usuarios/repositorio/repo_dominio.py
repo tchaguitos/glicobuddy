@@ -3,7 +3,7 @@ from typing import Iterator
 
 from libs.repositorio import SqlAlchemyRepository
 
-from contextos.usuarios.dominio.entidades import (
+from contextos.usuarios.dominio.agregados import (
     Email,
     Usuario,
 )

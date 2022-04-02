@@ -3,7 +3,7 @@ from uuid import UUID
 from libs.dominio import Dominio
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 
-from contextos.usuarios.dominio.entidades import Email, Usuario
+from contextos.usuarios.dominio.agregados import Email, Usuario
 
 
 def consultar_usuario_por_id(

@@ -5,7 +5,7 @@ from datetime import date, datetime
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 
-from contextos.usuarios.dominio.entidades import Usuario, Email
+from contextos.usuarios.dominio.agregados import Usuario, Email
 from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
 from contextos.usuarios.servicos.visualizadores import (
     consultar_usuario_por_id,

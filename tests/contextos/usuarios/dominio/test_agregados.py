@@ -4,7 +4,7 @@ from uuid import uuid4
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from contextos.usuarios.dominio.entidades import (
+from contextos.usuarios.dominio.agregados import (
     Email,
     Usuario,
 )

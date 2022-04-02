@@ -1,9 +1,12 @@
 from uuid import UUID, uuid4
 from datetime import date, datetime
 
+from libs.ddd import Agregado
+
 from dataclasses import dataclass, field
 from dataclass_type_validator import dataclass_validate
 
+from contextos.usuarios.dominio.eventos import EmailAlterado
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
@@ -29,16 +32,15 @@ class Email(str):
 
 @dataclass_validate
 @dataclass
-class Usuario:
+class Usuario(Agregado):
     email: Email
     senha: str
     nome_completo: str
     data_de_nascimento: date
     id: UUID = field(init=False, default_factory=uuid4)
-    data_criacao_utc: datetime  # TODO: criar contexto de auditoria?
+    data_criacao_utc: datetime
 
-    def __hash__(self):
-        return hash(self.id)
+    eventos = []
 
     class UsuarioInvalido(Exception):
         pass
@@ -70,5 +72,9 @@ class Usuario:
 
     def alterar_email(self, email: Email) -> "Usuario":
         self.email = email
-        # TODO: lancar evento "email alterado"
+        self.adicionar_evento(evento=EmailAlterado(usuario_id=self.id))
+
         return self
+
+    def __hash__(self):
+        return hash(self.id)

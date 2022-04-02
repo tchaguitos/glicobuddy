@@ -1,6 +1,5 @@
 import pytest
 
-from uuid import uuid4
 from freezegun import freeze_time
 from datetime import datetime, date
 
@@ -11,6 +10,7 @@ from contextos.usuarios.dominio.agregados import (
 from contextos.usuarios.dominio.objetos_de_valor import (
     ValoresParaEdicaoDeUsuario,
 )
+from contextos.usuarios.dominio.eventos import EmailAlterado
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -87,8 +87,14 @@ def test_alterar_email_usuario():
 
     assert usuario.email == Email("tchaguitos@teste.com")
 
+    assert usuario.eventos == []
+    assert len(usuario.eventos) == 0
+
     usuario = usuario.alterar_email(
         email=Email("tchaguitos@gmail.com"),
     )
+
+    assert len(usuario.eventos) == 1
+    assert usuario.eventos == [EmailAlterado(usuario_id=usuario.id)]
 
     assert usuario.email == Email("tchaguitos@gmail.com")

@@ -5,6 +5,7 @@ from contextos.usuarios.dominio.comandos import (
     EditarUsuario,
     AlterarEmailDoUsuario,
 )
+from contextos.usuarios.dominio.eventos import EmailAlterado
 
 from libs.dominio import Dominio
 
@@ -66,3 +67,7 @@ def alterar_email_do_usuario(
         uow.commit()
 
     return usuario_alterado
+
+
+def enviar_email_de_confirmacao(evento: EmailAlterado, uow: AbstractUnitOfWork):
+    print("==== ENVIOU O E-MAIL ====")

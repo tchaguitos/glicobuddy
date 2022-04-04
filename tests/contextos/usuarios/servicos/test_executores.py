@@ -6,7 +6,7 @@ from freezegun import freeze_time
 from datetime import datetime, date
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
-from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from contextos.usuarios.dominio.entidades import Usuario, Email
 from contextos.usuarios.dominio.comandos import (
@@ -22,7 +22,7 @@ from contextos.usuarios.servicos.executores import (
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
-class FakeRepo(RepoAbstratoUsuarios):
+class FakeRepo(RepositorioDominio, RepositorioConsulta):
     __usuarios: Set[Usuario]
 
     def __init__(self, usuarios: Optional[Set[Usuario]] = None):
@@ -54,7 +54,11 @@ class FakeRepo(RepoAbstratoUsuarios):
 
 class FakeUOW(AbstractUnitOfWork):
     def __init__(self):
-        self.repo_dominio = FakeRepo(set())
+        repo = FakeRepo(set())
+
+        self.repo_dominio = repo
+        self.repo_consulta = repo
+
         self.committed = False
 
     def commit(self):
@@ -68,7 +72,7 @@ class FakeUOW(AbstractUnitOfWork):
 def test_criar_usuario():
     uow = FakeUOW()
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 0
 
@@ -84,7 +88,7 @@ def test_criar_usuario():
 
     assert uow.committed is True
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == usuario_criado
@@ -133,7 +137,7 @@ def test_editar_usuario():
         uow=uow,
     )
 
-    usuario = uow.repo_dominio.consultar_por_id(id=usuario_criado.id)
+    usuario = uow.repo_consulta.consultar_por_id(id=usuario_criado.id)
 
     assert usuario.id == usuario_criado.id
     assert usuario.nome_completo == "Thiago Brasil"

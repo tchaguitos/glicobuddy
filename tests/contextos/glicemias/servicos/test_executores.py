@@ -5,6 +5,7 @@ from typing import Set, Optional
 from freezegun import freeze_time
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -21,10 +22,8 @@ from contextos.glicemias.servicos.executores import (
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
-from contextos.glicemias.repositorio.repo_dominio import RepoAbstratoGlicemias
 
-
-class FakeRepo(RepoAbstratoGlicemias):
+class FakeRepo(RepositorioDominio, RepositorioConsulta):
     __glicemias: Set[Glicemia]
 
     def __init__(self, glicemias: Optional[Set[Glicemia]] = None):
@@ -51,7 +50,11 @@ class FakeRepo(RepoAbstratoGlicemias):
 
 class FakeUOW(AbstractUnitOfWork):
     def __init__(self):
-        self.repo_dominio = FakeRepo(set())
+        repo = FakeRepo(set())
+
+        self.repo_dominio = repo
+        self.repo_consulta = repo
+
         self.committed = False
 
     def commit(self):
@@ -68,7 +71,7 @@ def test_criar_glicemia():
     id_usuario = uuid4()
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 0
 
@@ -85,7 +88,7 @@ def test_criar_glicemia():
 
     assert uow.committed is True
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada
@@ -121,7 +124,7 @@ def test_editar_glicemia():
 
     assert uow.committed is True
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
 
@@ -152,7 +155,7 @@ def test_editar_glicemia():
     assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario
     assert glicemia_editada.auditoria.data_ultima_edicao == horario_edicao
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
 
@@ -161,7 +164,7 @@ def test_editar_glicemia():
 def test_remover_glicemia():
     uow = FakeUOW()
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 0
 
@@ -178,7 +181,7 @@ def test_remover_glicemia():
 
     assert uow.committed is True
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
     assert registros_no_banco[0] == glicemia_criada
@@ -190,6 +193,6 @@ def test_remover_glicemia():
 
     assert id_glicemia_removida == glicemia_criada.id
 
-    registros_no_banco = list(uow.repo_dominio.consultar_todos())
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 0

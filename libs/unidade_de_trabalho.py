@@ -6,7 +6,8 @@ from config import get_session_factory
 from sqlalchemy.orm.session import Session
 
 from libs.dominio import Dominio
-from libs.repositorio import AbstractRepository, SqlAlchemyRepository
+
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 
 class UnidadeDeTrabalhoUtilizadaSemDominio(Exception):
@@ -15,20 +16,25 @@ class UnidadeDeTrabalhoUtilizadaSemDominio(Exception):
 
 class AbstractUnitOfWork(abc.ABC):
     committed: bool
-    repo_dominio: SqlAlchemyRepository
-    classe_repo_dominio: Type[SqlAlchemyRepository]
+    repo_dominio: RepositorioDominio
+    repo_consulta: RepositorioConsulta
+    classe_repo_dominio: Type[RepositorioDominio]
+    classe_repo_consulta: Type[RepositorioConsulta]
 
     def __enter__(self):
         return self
 
     def __exit__(self, *args, **kwargs):
-        # self.rollback() TODO: ajustar exception ao buscar registros pela api
+        # TODO: ajustar exception ao buscar registros pela api
+        # self.rollback()
         pass
 
     def __call__(self, dominio: Dominio):
         assert dominio, "o dominio deve ser passado para utilizar a unidade de trabalho"
 
+        # TODO: validar se existem os dois repos antes de setar?
         self.classe_repo_dominio = dominio.value[0]
+        self.classe_repo_consulta = dominio.value[1]
 
         return self
 
@@ -43,7 +49,8 @@ class AbstractUnitOfWork(abc.ABC):
 
 # TODO: mudar apenas para `unidade de trabalho`
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
-    repo_dominio: AbstractRepository
+    repo_dominio: RepositorioDominio
+    repo_consulta: RepositorioConsulta
 
     def __init__(self, session_factory=get_session_factory):
         self.session_factory = session_factory
@@ -57,7 +64,11 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.commited = False
 
         self.session: Session = self.session_factory()
-        self.repo_dominio: SqlAlchemyRepository = self.classe_repo_dominio(self.session)
+
+        self.repo_dominio: RepositorioDominio = self.classe_repo_dominio(self.session)
+        self.repo_consulta: RepositorioConsulta = self.classe_repo_consulta(
+            self.session
+        )
 
         return super().__enter__()
 

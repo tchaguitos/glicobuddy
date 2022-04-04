@@ -13,7 +13,7 @@ def consultar_usuario_por_id(
 
     # TODO: criar repo de visualizacao
     with uow(Dominio.usuarios):
-        usuario = uow.repo_dominio.consultar_por_id(id=usuario_id)
+        usuario = uow.repo_consulta.consultar_por_id(id=usuario_id)
 
     return usuario
 
@@ -24,6 +24,6 @@ def consultar_usuario_por_email(
 ) -> Usuario:
     # TODO: criar repo de visualizacao
     with uow(Dominio.usuarios):
-        usuario = uow.repo_dominio.consultar_por_email(email=Email(usuario_email))
+        usuario = uow.repo_consulta.consultar_por_email(email=Email(usuario_email))
 
     return usuario

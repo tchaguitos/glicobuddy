@@ -14,8 +14,7 @@ def consultar_glicemias(
 
     with uow(Dominio.glicemias):
         print(usuario_id)  # TODO: vincular glicemias a usuarios ou outra entidade
-        # TODO: criar repo de visualizacao
-        glicemias = uow.repo_dominio.consultar_todos()
+        glicemias = uow.repo_consulta.consultar_todos()
 
     return glicemias
 
@@ -28,7 +27,6 @@ def consultar_glicemia_por_id(
 
     with uow(Dominio.glicemias):
         print(usuario_id)  # TODO: vincular glicemias a usuarios ou outra entidade
-        # TODO: criar repo de visualizacao
-        glicemia = uow.repo_dominio.consultar_por_id(id=glicemia_id)
+        glicemia = uow.repo_consulta.consultar_por_id(id=glicemia_id)
 
     return glicemia

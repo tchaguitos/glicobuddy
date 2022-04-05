@@ -7,5 +7,11 @@ from libs.ddd import Evento
 
 @dataclass_validate
 @dataclass
+class UsuarioCriado(Evento):
+    usuario_id: UUID
+
+
+@dataclass_validate
+@dataclass
 class EmailAlterado(Evento):
     usuario_id: UUID

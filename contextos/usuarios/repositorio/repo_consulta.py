@@ -3,7 +3,7 @@ from typing import Iterator
 
 from libs.repositorio import RepositorioConsulta
 
-from contextos.usuarios.dominio.entidades import Email, Usuario
+from contextos.usuarios.dominio.agregados import Email, Usuario
 
 
 class RepoConsultaUsuarios(RepositorioConsulta):

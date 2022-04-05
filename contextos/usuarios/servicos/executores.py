@@ -12,7 +12,7 @@ from libs.dominio import Dominio
 
 def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
     with uow(Dominio.usuarios):
-        ja_existe_usuario_com_o_email = uow.repo_dominio.consultar_por_email(
+        ja_existe_usuario_com_o_email = uow.repo_consulta.consultar_por_email(
             email=Email(comando.email)
         )
 
@@ -36,7 +36,7 @@ def criar_usuario(comando: CriarUsuario, uow: AbstractUnitOfWork) -> Usuario:
 
 def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
     with uow(Dominio.usuarios):
-        usuario: Usuario = uow.repo_dominio.consultar_por_id(id=comando.usuario_id)
+        usuario: Usuario = uow.repo_consulta.consultar_por_id(id=comando.usuario_id)
 
         usuario_editado = usuario.editar(valores_para_edicao=comando.novos_valores)
 
@@ -50,7 +50,7 @@ def alterar_email_do_usuario(
     comando: AlterarEmailDoUsuario, uow: AbstractUnitOfWork
 ) -> Usuario:
     with uow(Dominio.usuarios):
-        usuario = uow.repo_dominio.consultar_por_email(email=Email(comando.novo_email))
+        usuario = uow.repo_consulta.consultar_por_email(email=Email(comando.novo_email))
 
         # email ja utilizado por usuario com id diferente
         if usuario and usuario.id != comando.usuario_id:
@@ -59,7 +59,7 @@ def alterar_email_do_usuario(
             )
 
         if not usuario:
-            usuario = uow.repo_dominio.consultar_por_id(id=comando.usuario_id)
+            usuario = uow.repo_consulta.consultar_por_id(id=comando.usuario_id)
 
         usuario_alterado = usuario.alterar_email(email=Email(comando.novo_email))
 

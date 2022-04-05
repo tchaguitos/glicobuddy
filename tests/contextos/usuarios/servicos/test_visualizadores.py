@@ -4,16 +4,16 @@ from freezegun import freeze_time
 from datetime import date, datetime
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from contextos.usuarios.dominio.agregados import Usuario, Email
-from contextos.usuarios.repositorio.repo_dominio import RepoAbstratoUsuarios
 from contextos.usuarios.servicos.visualizadores import (
     consultar_usuario_por_id,
     consultar_usuario_por_email,
 )
 
 
-class FakeRepo(RepoAbstratoUsuarios):
+class FakeRepo(RepositorioDominio, RepositorioConsulta):
     __usuarios: Set[Usuario]
 
     def __init__(self, usuarios: Optional[Set[Usuario]] = None):
@@ -45,7 +45,11 @@ class FakeRepo(RepoAbstratoUsuarios):
 
 class FakeUOW(AbstractUnitOfWork):
     def __init__(self):
-        self.repo_dominio = FakeRepo(set())
+        repo = FakeRepo(set())
+
+        self.repo_dominio = repo
+        self.repo_consulta = repo
+
         self.committed = False
 
     def commit(self):

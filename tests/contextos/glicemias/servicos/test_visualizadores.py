@@ -5,6 +5,7 @@ from typing import Set, Optional
 from freezegun import freeze_time
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -14,10 +15,8 @@ from contextos.glicemias.servicos.visualizadores import (
     consultar_glicemia_por_id,
 )
 
-from contextos.glicemias.repositorio.repo_dominio import RepoAbstratoGlicemias
 
-
-class FakeRepo(RepoAbstratoGlicemias):
+class FakeRepo(RepositorioDominio, RepositorioConsulta):
     __glicemias: Set[Glicemia]
 
     def __init__(self, glicemias: Optional[Set[Glicemia]] = None):
@@ -46,7 +45,11 @@ class FakeRepo(RepoAbstratoGlicemias):
 
 class FakeUOW(AbstractUnitOfWork):
     def __init__(self):
-        self.repo_dominio = FakeRepo(set())
+        repo = FakeRepo(set())
+
+        self.repo_dominio = repo
+        self.repo_consulta = repo
+
         self.committed = False
 
     def commit(self):

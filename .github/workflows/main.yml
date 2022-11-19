@@ -7,13 +7,13 @@ env:
 
 jobs:
   build:
-    name: Executando testes com Python 3.10
+    name: Executando testes automatizados
 
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.10]
+        python-version: ["3.10"]
 
     steps:
     - uses: actions/checkout@v2

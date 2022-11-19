@@ -14,18 +14,18 @@ class Encriptador(ABC):
     segredo: bytes = SEGREDO
 
     @abstractmethod
-    def _encriptar(self, texto: str) -> str:
+    def _encriptar(self, texto: str) -> bytes:
         raise NotImplementedError()
 
     @abstractmethod
-    def _verificar(self, texto_para_verificar: str, texto_original: str) -> bool:
+    def _verificar(self, texto_para_verificar: str, texto_original: bytes) -> bool:
         raise NotImplementedError()
 
 
 class EncriptadorDeSenha(Encriptador):
     """"""
 
-    def encriptar_senha(self, senha: str) -> str:
+    def encriptar_senha(self, senha: str) -> bytes:
         senha_encriptada = self._encriptar(texto=senha)
         return senha_encriptada
 
@@ -36,10 +36,16 @@ class EncriptadorDeSenha(Encriptador):
         )
         return senha_valida
 
-    def _encriptar(self, texto: str) -> str:
+    def _encriptar(self, texto: str) -> bytes:
+        texto = str.encode(texto)
         return bcrypt.hashpw(texto, self.segredo)
 
-    def _verificar(self, texto_para_verificar: str, texto_original: str):
+    def _verificar(self, texto_para_verificar: str, texto_original: bytes):
+        texto_para_verificar = str.encode(texto_para_verificar)
+
+        if not isinstance(texto_original, bytes):
+            texto_original = str.encode(texto_original)
+
         return bcrypt.checkpw(
             password=texto_para_verificar,
             hashed_password=texto_original,

@@ -23,6 +23,11 @@ class SerializadorParaEdicaoDeUsuario(BaseModel):
         extra = Extra.forbid
 
 
+class SerializadorParaAutenticarUsuario(BaseModel):
+    email: Email
+    senha: Senha
+
+
 class SerializadorParaAlteracaoDeEmail(BaseModel):
     novo_email: Email
 
@@ -39,3 +44,7 @@ class SerializadorDeUsuario(BaseModel):
 
 class RetornoDaAPIDeUsuarios(BaseModel):
     id: IdUsuario
+
+
+class RetornoDaAutenticacao(BaseModel):
+    logado: bool

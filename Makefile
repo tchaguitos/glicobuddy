@@ -4,6 +4,9 @@ run:
 test:
 	pytest -vv tests/
 
+shell:
+	python3 -i main.py
+
 coverage:
 	pytest --cov=libs/ --cov=contextos/ --cov-fail-under=90
 

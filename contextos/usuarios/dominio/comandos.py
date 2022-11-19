@@ -27,6 +27,13 @@ class EditarUsuario:
 
 @dataclass_validate
 @dataclass(frozen=True)
+class AutenticarUsuario:
+    email: Email
+    senha: Senha
+
+
+@dataclass_validate
+@dataclass(frozen=True)
 class AlterarEmailDoUsuario:
     usuario_id: IdUsuario
     novo_email: Email

@@ -8,29 +8,60 @@ from libs.tipos_basicos.identificadores_db import IdUsuario
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
     EditarUsuario,
+    AutenticarUsuario,
     AlterarEmailDoUsuario,
 )
-from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 from contextos.usuarios.servicos.executores import (
     criar_usuario,
     editar_usuario,
+    autenticar_usuario,
     alterar_email_do_usuario,
 )
 
 from contextos.usuarios.servicos.visualizadores import consultar_usuario_por_id
 
+from contextos.usuarios.adaptadores.encriptador import EncriptadorDeSenha
+from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
+
 from contextos.usuarios.pontos_de_entrada.serializadores import (
     SerializadorDeUsuario,
+    RetornoDaAutenticacao,
     RetornoDaAPIDeUsuarios,
     SerializadorParaEdicaoDeUsuario,
     SerializadorParaAlteracaoDeEmail,
     SerializadorParaCriacaoDeUsuario,
+    SerializadorParaAutenticarUsuario,
 )
 
 router = APIRouter(
     tags=["usuários"],
     responses={404: {"description": "Not found"}},
 )
+
+
+@router.post(
+    "/v1/usuarios/login",
+    status_code=200,
+    response_model=RetornoDaAutenticacao,
+)
+def login(
+    dados_para_login: SerializadorParaAutenticarUsuario,
+):
+
+    uow = SqlAlchemyUnitOfWork()
+
+    usuario_autenticado = autenticar_usuario(
+        comando=AutenticarUsuario(
+            email=Email(dados_para_login.email),
+            senha=Senha(dados_para_login.senha),
+        ),
+        uow=uow,
+    )
+
+    if not usuario_autenticado:
+        raise HTTPException(status_code=400, detail="Usuário ou senha incorretos")
+
+    return RetornoDaAutenticacao(logado=usuario_autenticado)
 
 
 @router.post(
@@ -52,6 +83,7 @@ def cadastrar_usuario(
             data_de_nascimento=novo_usuario.data_de_nascimento,
         ),
         uow=uow,
+        encriptador=EncriptadorDeSenha(),
     )
 
     return RetornoDaAPIDeUsuarios(id=usuario_criado.id)

@@ -99,10 +99,12 @@ def test_criar_usuario():
     registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
-    assert registros_no_banco[0] == usuario_criado
 
-    assert usuario_criado.id
-    assert usuario_criado.senha == Senha("abc123")
+    usuario_do_db = registros_no_banco[0]
+    assert usuario_do_db == usuario_criado
+
+    assert usuario_do_db.id
+    assert usuario_do_db.senha == Senha("abc123")
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -131,13 +133,15 @@ def test_criar_usuario_com_senha_encriptada():
     registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
     assert len(registros_no_banco) == 1
-    assert registros_no_banco[0] == usuario_criado
 
-    assert usuario_criado.id
+    usuario_do_db = registros_no_banco[0]
+
+    assert usuario_do_db == usuario_criado
+    assert usuario_do_db.id
 
     senha_eh_valida = encriptador.verificar_senha(
         senha_para_verificar=Senha("abc123"),
-        senha_do_usuario=usuario_criado.senha,
+        senha_do_usuario=usuario_do_db.senha,
     )
 
     assert senha_eh_valida is True

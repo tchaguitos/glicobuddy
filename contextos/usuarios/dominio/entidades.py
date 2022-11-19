@@ -1,40 +1,22 @@
-from uuid import UUID, uuid4
 from datetime import date, datetime
 
 from dataclasses import dataclass, field
 from dataclass_type_validator import dataclass_validate
 
+from libs.tipos_basicos.texto import Nome, Email, Senha
+from libs.tipos_basicos.identificadores_db import IdUsuario
+
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
-
-
-class Email(str):
-    class EmailInvalido(Exception):
-        pass
-
-    def __init__(self, email):
-        self.__verificar_se_email_eh_valido(email=email)
-
-    def __verificar_se_email_eh_valido(self, email: str):
-        # TODO: criar "validacao real"
-        if "@" not in email:
-            raise self.EmailInvalido("Você deve fornecer um e-mail válido")
-
-        if len(email) <= 8:
-            raise self.EmailInvalido(
-                "O e-mail fornecido não possui caracteres suficientes"
-            )
-
-        return None
 
 
 @dataclass_validate
 @dataclass
 class Usuario:
     email: Email
-    senha: str
-    nome_completo: str
+    senha: Senha
+    nome_completo: Nome
     data_de_nascimento: date
-    id: UUID = field(init=False, default_factory=uuid4)
+    id: IdUsuario = field(init=False, default_factory=IdUsuario)
     data_criacao_utc: datetime  # TODO: criar contexto de auditoria?
 
     def __hash__(self):
@@ -46,9 +28,9 @@ class Usuario:
     @classmethod
     def criar(
         cls,
-        email: str,
-        senha: str,
-        nome_completo: str,
+        email: Email,
+        senha: Senha,
+        nome_completo: Nome,
         data_de_nascimento: date,
     ) -> "Usuario":
         return cls(

@@ -4,6 +4,12 @@ run:
 test:
 	pytest -vv tests/
 
+shell:
+	python3 -i main.py
+
+generete-secret-key:
+	openssl rand -hex 32
+
 coverage:
 	pytest --cov=libs/ --cov=contextos/ --cov-fail-under=90
 

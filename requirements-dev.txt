@@ -1,6 +1,7 @@
 anyio==3.3.4
 asgiref==3.4.1
 attrs==21.2.0
+bcrypt==4.0.1
 black==21.10b0
 certifi==2021.10.8
 charset-normalizer==2.0.9

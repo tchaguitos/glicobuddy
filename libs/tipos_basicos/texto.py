@@ -37,7 +37,7 @@ class Senha(str):
     """"""
 
     def __new__(cls, senha: str):
-        if len(senha) <= 7:
+        if len(senha) < 6:
             raise SenhaInvalida("A senha não possui caracteres suficientes")
 
         return super().__new__(cls, senha)

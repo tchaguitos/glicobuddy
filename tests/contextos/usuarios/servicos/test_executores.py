@@ -8,7 +8,10 @@ from datetime import datetime, date
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
-from contextos.usuarios.dominio.entidades import Usuario, Email
+from libs.tipos_basicos.texto import Email, Senha, Nome
+from libs.tipos_basicos.identificadores_db import IdUsuario
+
+from contextos.usuarios.dominio.entidades import Usuario
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
     EditarUsuario,
@@ -79,8 +82,8 @@ def test_criar_usuario():
     usuario_criado = criar_usuario(
         comando=CriarUsuario(
             email=Email("tchaguitos@gmail.com"),
-            senha="abc123",
-            nome_completo="Thiago Brasil",
+            senha=Senha("abc123"),
+            nome_completo=Nome("Thiago Brasil"),
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
@@ -102,8 +105,8 @@ def test_criar_usuario_com_email_ja_existente():
     criar_usuario(
         comando=CriarUsuario(
             email=Email("tchaguitos@gmail.com"),
-            senha="abc123",
-            nome_completo="Thiago Brasil",
+            senha=Senha("abc123"),
+            nome_completo=Nome("Thiago Brasil"),
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
@@ -113,8 +116,8 @@ def test_criar_usuario_com_email_ja_existente():
         criar_usuario(
             comando=CriarUsuario(
                 email=Email("tchaguitos@gmail.com"),
-                senha="abc123",
-                nome_completo="Thiago Brasil",
+                senha=Senha("abc123"),
+                nome_completo=Nome("Thiago Brasil"),
                 data_de_nascimento=date(1995, 8, 27),
             ),
             uow=uow,
@@ -130,8 +133,8 @@ def test_editar_usuario():
     usuario_criado = criar_usuario(
         comando=CriarUsuario(
             email=Email("tchaguitos@gmail.com"),
-            senha="abc123",
-            nome_completo="Thiago Brasil",
+            senha=Senha("abc123"),
+            nome_completo=Nome("Thiago Brasil"),
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
@@ -145,11 +148,12 @@ def test_editar_usuario():
 
     usuario_editado = editar_usuario(
         comando=EditarUsuario(
-            usuario_id=usuario_criado.id,
+            usuario_id=IdUsuario(usuario_criado.id),
             novos_valores=ValoresParaEdicaoDeUsuario(
-                nome_completo="Bill Cypher", data_de_nascimento=date(1985, 9, 15)
+                nome_completo=Nome("Bill Cypher"),
+                data_de_nascimento=date(1985, 9, 15),
             ),
-            editado_por=usuario_criado.id,
+            editado_por=IdUsuario(usuario_criado.id),
         ),
         uow=uow,
     )
@@ -166,8 +170,8 @@ def test_alterar_email_de_usuario():
     usuario_1 = criar_usuario(
         comando=CriarUsuario(
             email=Email("usuario.1@teste.com"),
-            senha="abc123",
-            nome_completo="Usuario 1",
+            senha=Senha("abc123"),
+            nome_completo=Nome("Usuario 1"),
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
@@ -176,8 +180,8 @@ def test_alterar_email_de_usuario():
     usuario_2 = criar_usuario(
         comando=CriarUsuario(
             email=Email("usuario.2@teste.com"),
-            senha="abc123",
-            nome_completo="Usuario 2",
+            senha=Senha("abc123"),
+            nome_completo=Nome("Usuario 2"),
             data_de_nascimento=date(1990, 8, 27),
         ),
         uow=uow,
@@ -187,7 +191,7 @@ def test_alterar_email_de_usuario():
 
     usuario_com_email_alterado = alterar_email_do_usuario(
         comando=AlterarEmailDoUsuario(
-            usuario_id=usuario_1.id,
+            usuario_id=IdUsuario(usuario_1.id),
             novo_email=Email("tchaguitos@gmail.com"),
         ),
         uow=uow,
@@ -199,7 +203,7 @@ def test_alterar_email_de_usuario():
     with pytest.raises(Usuario.UsuarioInvalido) as e:
         usuario_com_email_alterado = alterar_email_do_usuario(
             comando=AlterarEmailDoUsuario(
-                usuario_id=usuario_2.id,
+                usuario_id=IdUsuario(usuario_2.id),
                 novo_email=Email("tchaguitos@gmail.com"),
             ),
             uow=uow,

@@ -38,7 +38,7 @@ def test_editar_usuario(session):
     data_de_nascimento = date(1995, 8, 27)
 
     usuario_a_ser_criado = {
-        "email": "nome.completo@teste.com.br",
+        "email": "editar.nome@teste.com",
         "senha": "senha123",
         "nome_completo": "Nome completo",
         "data_de_nascimento": str(data_de_nascimento),
@@ -68,7 +68,7 @@ def test_alterar_email_do_usuario(session):
     data_de_nascimento = date(1995, 8, 27)
 
     usuario_a_ser_criado = {
-        "email": "nome-teste@teste.com.br",
+        "email": "nome_teste@teste.com",
         "senha": "senha123",
         "nome_completo": "Nome completo",
         "data_de_nascimento": str(data_de_nascimento),
@@ -84,7 +84,7 @@ def test_alterar_email_do_usuario(session):
 
     email_do_usuario = response.json().get("email")
 
-    assert email_do_usuario == "nome-teste@teste.com.br"
+    assert email_do_usuario == "nome_teste@teste.com"
 
     response = client.patch(
         f"/v1/usuarios/{usuario_id}/alterar-email",

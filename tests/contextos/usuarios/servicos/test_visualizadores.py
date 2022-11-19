@@ -6,7 +6,10 @@ from datetime import date, datetime
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
-from contextos.usuarios.dominio.entidades import Usuario, Email
+from libs.tipos_basicos.texto import Email, Senha, Nome
+
+from contextos.usuarios.dominio.entidades import Usuario
+
 from contextos.usuarios.servicos.visualizadores import (
     consultar_usuario_por_id,
     consultar_usuario_por_email,
@@ -65,8 +68,8 @@ def test_consultar_usuario_por_id():
 
     usuario_criado = Usuario.criar(
         email=Email("tchaguitos@gmail.com"),
-        senha="abc123",
-        nome_completo="Thiago Brasil",
+        senha=Senha("abc123"),
+        nome_completo=Nome("Thiago Brasil"),
         data_de_nascimento=date(1995, 8, 27),
     )
 
@@ -89,8 +92,8 @@ def test_consultar_usuario_por_email():
 
     usuario_criado = Usuario.criar(
         email=Email("tchaguitos@gmail.com"),
-        senha="abc123",
-        nome_completo="Thiago Brasil",
+        senha=Senha("abc123"),
+        nome_completo=Nome("Thiago Brasil"),
         data_de_nascimento=date(1995, 8, 27),
     )
 

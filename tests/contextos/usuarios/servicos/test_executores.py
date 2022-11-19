@@ -82,6 +82,35 @@ def test_criar_usuario():
 
     assert len(registros_no_banco) == 0
 
+    usuario_criado = criar_usuario(
+        comando=CriarUsuario(
+            email=Email("tchaguitos@gmail.com"),
+            senha=Senha("abc123"),
+            nome_completo=Nome("Thiago Brasil"),
+            data_de_nascimento=date(1995, 8, 27),
+        ),
+        uow=uow,
+    )
+
+    assert uow.committed is True
+
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
+
+    assert len(registros_no_banco) == 1
+    assert registros_no_banco[0] == usuario_criado
+
+    assert usuario_criado.id
+    assert usuario_criado.senha == Senha("abc123")
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_criar_usuario_com_senha_encriptada():
+    uow = FakeUOW()
+
+    registros_no_banco = list(uow.repo_consulta.consultar_todos())
+
+    assert len(registros_no_banco) == 0
+
     encriptador = EncriptadorDeSenha()
 
     usuario_criado = criar_usuario(
@@ -110,35 +139,6 @@ def test_criar_usuario():
     )
 
     assert senha_eh_valida is True
-
-
-@freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_criar_usuario_com_senha_encriptada():
-    uow = FakeUOW()
-
-    registros_no_banco = list(uow.repo_consulta.consultar_todos())
-
-    assert len(registros_no_banco) == 0
-
-    usuario_criado = criar_usuario(
-        comando=CriarUsuario(
-            email=Email("tchaguitos@gmail.com"),
-            senha=Senha("abc123"),
-            nome_completo=Nome("Thiago Brasil"),
-            data_de_nascimento=date(1995, 8, 27),
-        ),
-        uow=uow,
-    )
-
-    assert uow.committed is True
-
-    registros_no_banco = list(uow.repo_consulta.consultar_todos())
-
-    assert len(registros_no_banco) == 1
-    assert registros_no_banco[0] == usuario_criado
-
-    assert usuario_criado.id
-    assert usuario_criado.senha == Senha("abc123")
 
 
 def test_criar_usuario_com_email_ja_existente():

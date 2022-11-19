@@ -35,11 +35,11 @@ def criar_usuario(
 
         if encriptador:
             senha = encriptador.encriptar_senha(senha=comando.senha)
-            senha = senha.decode()
+            senha = Senha(senha.decode())
 
         novo_usuario = Usuario.criar(
             email=Email(comando.email),
-            senha=Senha(senha),
+            senha=senha,
             nome_completo=comando.nome_completo,
             data_de_nascimento=comando.data_de_nascimento,
         )

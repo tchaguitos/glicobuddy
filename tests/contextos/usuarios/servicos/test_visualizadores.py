@@ -1,4 +1,3 @@
-from uuid import UUID
 from typing import Set, Optional
 from freezegun import freeze_time
 from datetime import date, datetime
@@ -7,6 +6,7 @@ from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from libs.tipos_basicos.texto import Email, Senha, Nome
+from libs.tipos_basicos.identificadores_db import IdUsuario
 
 from contextos.usuarios.dominio.entidades import Usuario
 
@@ -37,8 +37,10 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
     def consultar_todos(self):
         yield from self.__usuarios
 
-    def consultar_por_id(self, id: UUID):
-        return next((usuario for usuario in self.__usuarios if usuario.id == id), None)
+    def consultar_por_id(self, id_usuario: IdUsuario):
+        return next(
+            (usuario for usuario in self.__usuarios if usuario.id == id_usuario), None
+        )
 
     def consultar_por_email(self, email: Email):
         return next(

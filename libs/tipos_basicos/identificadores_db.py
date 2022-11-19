@@ -8,19 +8,20 @@ class Id(UUID):
     """
 
     def __init__(self, *args):
-        uuid_ou_string: bool = isinstance(args[0], (UUID, str))
-        eh_uma_subclasse: bool = issubclass(self.__class__, Id)
 
-        if not args:
+        if args:
+            uuid_ou_string: bool = isinstance(args[0], Union[UUID, str])
+            eh_uma_subclasse: bool = issubclass(self.__class__, Id)
+
+            if not uuid_ou_string:
+                raise ValueError(
+                    f"Para instanciar um `Id` passe um uuid4() ou um uuid4() como string"
+                )
+
+            if uuid_ou_string and eh_uma_subclasse:
+                novo_id = str(args[0])
+        else:
             novo_id = str(uuid4())
-
-        if not uuid_ou_string:
-            raise ValueError(
-                f"Para instanciar um `Id` passe um uuid4() ou um uuid4() como string"
-            )
-
-        if uuid_ou_string and eh_uma_subclasse:
-            novo_id = str(args[0])
 
         super().__init__(novo_id)
 

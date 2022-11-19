@@ -50,18 +50,22 @@ def login(
 
     uow = SqlAlchemyUnitOfWork()
 
-    usuario_autenticado = autenticar_usuario(
-        comando=AutenticarUsuario(
-            email=Email(dados_para_login.email),
-            senha=Senha(dados_para_login.senha),
-        ),
-        uow=uow,
-    )
+    try:
+        token_gerado = autenticar_usuario(
+            comando=AutenticarUsuario(
+                email=Email(dados_para_login.email),
+                senha=Senha(dados_para_login.senha),
+            ),
+            uow=uow,
+        )
 
-    if not usuario_autenticado:
+        return RetornoDaAutenticacao(
+            access_token=token_gerado,
+            token_type="jwt",
+        )
+
+    except Exception:
         raise HTTPException(status_code=400, detail="Usuário ou senha incorretos")
-
-    return RetornoDaAutenticacao(logado=usuario_autenticado)
 
 
 @router.post(

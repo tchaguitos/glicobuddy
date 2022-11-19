@@ -4,8 +4,6 @@ from libs.dominio import Dominio
 from libs.tipos_basicos.texto import Email, Senha
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 
-from contextos.usuarios.exceptions import UsuarioNaoEncontrado
-
 from contextos.usuarios.dominio.entidades import Usuario
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
@@ -13,7 +11,9 @@ from contextos.usuarios.dominio.comandos import (
     AutenticarUsuario,
     AlterarEmailDoUsuario,
 )
+from contextos.usuarios.adaptadores.jwt import GeradorDeToken, Token
 from contextos.usuarios.adaptadores.encriptador import EncriptadorDeSenha
+from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticacao
 
 
 def criar_usuario(
@@ -64,7 +64,7 @@ def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
     return usuario_editado
 
 
-def autenticar_usuario(comando: AutenticarUsuario, uow: AbstractUnitOfWork) -> Usuario:
+def autenticar_usuario(comando: AutenticarUsuario, uow: AbstractUnitOfWork) -> Token:
     with uow(Dominio.usuarios):
         usuario: Usuario = uow.repo_consulta.consultar_por_email(email=comando.email)
 
@@ -72,15 +72,15 @@ def autenticar_usuario(comando: AutenticarUsuario, uow: AbstractUnitOfWork) -> U
             raise UsuarioNaoEncontrado("Usuário não encontrado")
 
         encriptador = EncriptadorDeSenha()
-
         senha_eh_valida = encriptador.verificar_senha(
             senha_para_verificar=comando.senha,
             senha_do_usuario=usuario.senha,
         )
 
-        # TODO: gerar e retornar o token jwt?
+        if not senha_eh_valida:
+            raise ErroNaAutenticacao("Usuário ou senha incorretos")
 
-        return senha_eh_valida
+        return GeradorDeToken.gerar_token(usuario=usuario)
 
 
 def alterar_email_do_usuario(

@@ -25,7 +25,9 @@ from contextos.usuarios.servicos.executores import (
 )
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
+from contextos.usuarios.adaptadores.jwt import GeradorDeToken
 from contextos.usuarios.adaptadores.encriptador import EncriptadorDeSenha
+from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticacao
 
 
 class FakeRepo(RepositorioDominio, RepositorioConsulta):
@@ -212,7 +214,7 @@ def test_autenticar_usuario():
     email = Email("usuario.1@teste.com")
     senha = Senha("abc123")
 
-    criar_usuario(
+    usuario_criado = criar_usuario(
         comando=CriarUsuario(
             email=email,
             senha=senha,
@@ -223,7 +225,7 @@ def test_autenticar_usuario():
         encriptador=EncriptadorDeSenha(),
     )
 
-    usuario_autenticado = autenticar_usuario(
+    token = autenticar_usuario(
         comando=AutenticarUsuario(
             email=email,
             senha=senha,
@@ -231,37 +233,49 @@ def test_autenticar_usuario():
         uow=uow,
     )
 
-    assert usuario_autenticado is True
+    assert token
 
-    usuario_autenticado = autenticar_usuario(
-        comando=AutenticarUsuario(
-            email=email,
-            senha=Senha("123abcd"),
-        ),
-        uow=uow,
-    )
+    payload = GeradorDeToken.verificar_token(token=token)
 
-    assert usuario_autenticado is False
+    assert payload == {
+        "id": str(usuario_criado.id),
+        "email": usuario_criado.email,
+        "nome_completo": usuario_criado.nome_completo,
+        "data_de_nascimento": usuario_criado.data_de_nascimento.strftime("%d/%m/%Y"),
+    }
 
-    usuario_autenticado = autenticar_usuario(
-        comando=AutenticarUsuario(
-            email=email,
-            senha=Senha("senhaaaAaaAa"),
-        ),
-        uow=uow,
-    )
+    with pytest.raises(UsuarioNaoEncontrado) as e:
+        autenticar_usuario(
+            comando=AutenticarUsuario(
+                email=Email("outro@teste.com"),
+                senha=Senha("123abcd"),
+            ),
+            uow=uow,
+        )
 
-    assert usuario_autenticado is False
+        assert str(e) == "Usuário não encontrado"
 
-    usuario_autenticado = autenticar_usuario(
-        comando=AutenticarUsuario(
-            email=email,
-            senha=Senha("abc123"),
-        ),
-        uow=uow,
-    )
+    with pytest.raises(ErroNaAutenticacao) as e:
+        autenticar_usuario(
+            comando=AutenticarUsuario(
+                email=email,
+                senha=Senha("123abcd"),
+            ),
+            uow=uow,
+        )
 
-    assert usuario_autenticado is True
+        assert str(e) == "Usuário ou senha incorretos"
+
+    with pytest.raises(ErroNaAutenticacao) as e:
+        autenticar_usuario(
+            comando=AutenticarUsuario(
+                email=email,
+                senha=Senha("senhaaaAaaAa"),
+            ),
+            uow=uow,
+        )
+
+        assert str(e) == "Usuário ou senha incorretos"
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

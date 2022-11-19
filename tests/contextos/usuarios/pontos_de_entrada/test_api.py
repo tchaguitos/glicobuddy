@@ -49,7 +49,7 @@ def test_login(session):
     assert response.status_code == 201
 
     dados_para_login = {
-        "email": "nome.completo@teste.com",
+        "email": "login@teste.com",
         "senha": "senha123",
     }
 
@@ -58,13 +58,14 @@ def test_login(session):
         json=dados_para_login,
     )
 
-    assert "logado" in response.json()
     assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json().get("token_type") == "jwt"
 
     response = client.post(
         "/v1/usuarios/login",
         json={
-            "email": "nome.completo@teste.com",
+            "email": "login@teste.com",
             "senha": "senha123errada",
         },
     )

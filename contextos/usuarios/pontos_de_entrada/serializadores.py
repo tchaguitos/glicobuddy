@@ -47,4 +47,5 @@ class RetornoDaAPIDeUsuarios(BaseModel):
 
 
 class RetornoDaAutenticacao(BaseModel):
-    logado: bool
+    access_token: str
+    token_type: str

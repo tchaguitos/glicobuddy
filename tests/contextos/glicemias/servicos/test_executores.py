@@ -6,6 +6,7 @@ from freezegun import freeze_time
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
+from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -44,7 +45,7 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
     def consultar_todos(self):
         yield from self.__glicemias
 
-    def consultar_por_id(self, id: UUID):
+    def consultar_por_id(self, id: IdGlicemia):
         return next(glicemia for glicemia in self.__glicemias if glicemia.id == id)
 
 
@@ -81,7 +82,7 @@ def test_criar_glicemia():
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
             primeira_do_dia=True,
-            criado_por=id_usuario,
+            criado_por=IdUsuario(id_usuario),
         ),
         uow=uow,
     )
@@ -117,7 +118,7 @@ def test_editar_glicemia():
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
             primeira_do_dia=True,
-            criado_por=id_usuario,
+            criado_por=IdUsuario(id_usuario),
         ),
         uow=uow,
     )
@@ -137,14 +138,14 @@ def test_editar_glicemia():
     with freeze_time(horario_edicao):
         glicemia_editada = editar_glicemia(
             comando=EditarGlicemia(
-                glicemia_id=glicemia_criada.id,
+                glicemia_id=IdGlicemia(glicemia_criada.id),
                 novos_valores=ValoresParaEdicaoDeGlicemia(
                     valor=98,
                     primeira_do_dia=True,
                     horario_dosagem=horario_dosagem,
                     observacoes="teste mano afff",
                 ),
-                editado_por=id_usuario,
+                editado_por=IdUsuario(id_usuario),
             ),
             uow=uow,
         )
@@ -174,7 +175,7 @@ def test_remover_glicemia():
             horario_dosagem=datetime(2021, 8, 27, 10, 15),
             observacoes="glicose em jejum",
             primeira_do_dia=False,
-            criado_por=uuid4(),
+            criado_por=IdUsuario(uuid4()),
         ),
         uow=uow,
     )
@@ -187,7 +188,9 @@ def test_remover_glicemia():
     assert registros_no_banco[0] == glicemia_criada
 
     id_glicemia_removida = remover_glicemia(
-        comando=RemoverGlicemia(glicemia_id=glicemia_criada.id),
+        comando=RemoverGlicemia(
+            glicemia_id=IdGlicemia(glicemia_criada.id),
+        ),
         uow=uow,
     )
 

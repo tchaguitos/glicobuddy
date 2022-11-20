@@ -2,9 +2,12 @@ from libs.barramento import MessageBus
 from libs.unidade_de_trabalho import AbstractUnitOfWork, SqlAlchemyUnitOfWork
 
 from contextos.barramento import usuarios
+from contextos.barramento import glicemias
 
-
-CONTEXTOS = [usuarios]
+CONTEXTOS = [
+    usuarios,
+    glicemias,
+]
 
 
 def coletar_executores_em_todos_os_contextos():

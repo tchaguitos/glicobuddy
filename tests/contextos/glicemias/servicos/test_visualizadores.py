@@ -6,6 +6,7 @@ from freezegun import freeze_time
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
+from libs.tipos_basicos.identificadores_db import IdUsuario
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
@@ -75,7 +76,7 @@ def test_consultar_glicemias():
             horario_dosagem=horario_dosagem_1,
             observacoes="glicose em jejum",
             auditoria=Auditoria(
-                criado_por=usuario_id,
+                criado_por=IdUsuario(usuario_id),
                 data_criacao=datetime.now(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -89,7 +90,7 @@ def test_consultar_glicemias():
             horario_dosagem=horario_dosagem_2,
             observacoes="depois do café da manhã",
             auditoria=Auditoria(
-                criado_por=usuario_id,
+                criado_por=IdUsuario(usuario_id),
                 data_criacao=datetime.now() + timedelta(hours=2),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -115,7 +116,7 @@ def test_consultar_glicemias():
         horario_dosagem=horario_dosagem_3,
         observacoes="pré almoço",
         auditoria=Auditoria(
-            criado_por=usuario_id,
+            criado_por=IdUsuario(usuario_id),
             data_criacao=datetime.now() + timedelta(hours=4),
             ultima_vez_editado_por=None,
             data_ultima_edicao=None,
@@ -148,7 +149,7 @@ def test_consultar_glicemia_por_id():
             horario_dosagem=horario_dosagem_1,
             observacoes="glicose em jejum",
             auditoria=Auditoria(
-                criado_por=usuario_id,
+                criado_por=IdUsuario(usuario_id),
                 data_criacao=datetime.now(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -162,7 +163,7 @@ def test_consultar_glicemia_por_id():
             horario_dosagem=horario_dosagem_2,
             observacoes="depois do café da manhã",
             auditoria=Auditoria(
-                criado_por=usuario_id,
+                criado_por=IdUsuario(usuario_id),
                 data_criacao=datetime.now() + timedelta(hours=2),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -176,7 +177,7 @@ def test_consultar_glicemia_por_id():
             horario_dosagem=horario_dosagem_3,
             observacoes="pré almoço",
             auditoria=Auditoria(
-                criado_por=usuario_id,
+                criado_por=IdUsuario(usuario_id),
                 data_criacao=datetime.now() + timedelta(hours=4),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,

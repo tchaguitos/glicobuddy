@@ -17,3 +17,6 @@ class UsuarioCriado(Evento):
 class EmailAlterado(Evento):
     usuario_id: IdUsuario
     novo_email: Email
+
+    def __hash__(self):
+        return hash(self.usuario_id)

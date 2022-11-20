@@ -66,9 +66,11 @@ class MessageBus:
         )
 
         for executor in executores_do_comando:
+            resultado_do_comando = None
+
             try:
                 logger.debug(
-                    "Executando o evento %s utilizando o executor %s",
+                    "Executando o comando %s utilizando o executor %s",
                     comando.__class__.__name__,
                     executor.__name__,
                 )

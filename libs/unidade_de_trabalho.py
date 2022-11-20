@@ -41,7 +41,7 @@ class AbstractUnitOfWork(abc.ABC):
         repositorios: List[RepositorioDominio] = []
 
         if hasattr(self, "repo_dominio") and self.repo_dominio:
-            repositorios.extend(self.repo_dominio.values())
+            repositorios.extend([self.repo_dominio])
 
         for repositorio in repositorios:
             for agregado in repositorio.objetos_modificados:

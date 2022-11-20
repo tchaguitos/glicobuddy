@@ -8,8 +8,7 @@ from libs.repositorio import RepositorioDominio, RepositorioConsulta
 from libs.tipos_basicos.texto import Email, Senha, Nome
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
-from contextos.usuarios.dominio.entidades import Usuario
-
+from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.servicos.visualizadores import (
     consultar_usuario_por_id,
     consultar_usuario_por_email,

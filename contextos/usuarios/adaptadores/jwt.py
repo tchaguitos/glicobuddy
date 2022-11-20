@@ -2,7 +2,7 @@ import jwt
 
 from typing import Dict, Any
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 
 ALGORITMO = "HS256"
 MINUTOS_ATE_EXPIRAR = 24 * 60

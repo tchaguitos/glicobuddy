@@ -1,19 +1,25 @@
 import pytest
 
-from libs.dominio import Dominio
+from typing import Type
 
-from libs.repositorio import AbstractRepository
+from libs.dominio import Dominio
+from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from libs.unidade_de_trabalho import AbstractUnitOfWork, SqlAlchemyUnitOfWork
 
 from contextos.usuarios.repositorio.repo_dominio import RepoDominioUsuarios
+from contextos.usuarios.repositorio.repo_consulta import RepoConsultaUsuarios
+
 from contextos.glicemias.repositorio.repo_dominio import RepoDominioGlicemias
+from contextos.glicemias.repositorio.repo_consulta import RepoConsultaGlicemias
 
 
 class FakeUOW(AbstractUnitOfWork):
     committed: bool = False
-    classe_repo_dominio: AbstractRepository = None
-    repo_dominio: AbstractRepository = None
+    repo_dominio: RepositorioDominio = None
+    classe_repo_dominio: Type[RepositorioDominio] = None
+    repo_consulta: RepositorioConsulta = None
+    classe_repo_consulta: Type[RepositorioConsulta] = None
 
     def commit(self):
         self.committed = True
@@ -24,8 +30,10 @@ class FakeUOW(AbstractUnitOfWork):
 
 class FakeSQLUOW(SqlAlchemyUnitOfWork):
     committed: bool = False
-    classe_repo_dominio: AbstractRepository = None
-    repo_dominio: AbstractRepository = None
+    repo_dominio: RepositorioDominio = None
+    classe_repo_dominio: Type[RepositorioDominio] = None
+    repo_consulta: RepositorioConsulta = None
+    classe_repo_consulta: Type[RepositorioConsulta] = None
 
     def commit(self):
         self.committed = True
@@ -69,14 +77,17 @@ def test_unidade_de_trabalho_abstrata_sql():
 
     assert uow.classe_repo_dominio is None
     assert uow.repo_dominio is None
+    assert uow.repo_consulta is None
 
     with uow(Dominio.glicemias):
         assert uow.classe_repo_dominio
         assert isinstance(uow.repo_dominio, RepoDominioGlicemias)
+        assert isinstance(uow.repo_consulta, RepoConsultaGlicemias)
 
     with uow(Dominio.usuarios):
         assert uow.classe_repo_dominio
         assert isinstance(uow.repo_dominio, RepoDominioUsuarios)
+        assert isinstance(uow.repo_consulta, RepoConsultaUsuarios)
 
         uow.commit()
 

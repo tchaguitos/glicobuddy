@@ -1,12 +1,11 @@
 import abc
 
-from typing import Type
+from typing import Type, List
 
 from config import get_session_factory
 from sqlalchemy.orm.session import Session
 
 from libs.dominio import Dominio
-
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 
@@ -37,6 +36,17 @@ class AbstractUnitOfWork(abc.ABC):
         self.classe_repo_consulta = dominio.value[1]
 
         return self
+
+    def coletar_novos_eventos(self):
+        repositorios: List[RepositorioDominio] = []
+
+        if hasattr(self, "repo_dominio") and self.repo_dominio:
+            repositorios.extend([self.repo_dominio])
+
+        for repositorio in repositorios:
+            for agregado in repositorio.objetos_modificados:
+                while getattr(agregado, "eventos", []):
+                    yield agregado.eventos.pop(0)
 
     @abc.abstractmethod
     def commit(self):

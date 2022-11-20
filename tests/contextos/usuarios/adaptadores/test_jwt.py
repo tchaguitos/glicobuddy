@@ -3,7 +3,7 @@ from datetime import datetime, date
 
 from libs.tipos_basicos.texto import Email, Senha, Nome
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.adaptadores.jwt import GeradorDeToken
 
 

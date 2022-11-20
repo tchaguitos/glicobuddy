@@ -1,10 +1,11 @@
+from main import app
+
 from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from main import app
 
 client = TestClient(app)
 

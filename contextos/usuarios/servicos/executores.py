@@ -4,13 +4,15 @@ from libs.dominio import Dominio
 from libs.tipos_basicos.texto import Email, Senha
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
     EditarUsuario,
     AutenticarUsuario,
     AlterarEmailDoUsuario,
 )
+
+from contextos.usuarios.dominio.eventos import EmailAlterado
 from contextos.usuarios.adaptadores.jwt import GeradorDeToken, Token
 from contextos.usuarios.adaptadores.encriptador import EncriptadorDeSenha
 from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticacao
@@ -19,7 +21,7 @@ from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticac
 def criar_usuario(
     comando: CriarUsuario,
     uow: AbstractUnitOfWork,
-    encriptador: Optional[EncriptadorDeSenha] = None,
+    encriptar_senha: Optional[bool] = True,
 ) -> Usuario:
     with uow(Dominio.usuarios):
         ja_existe_usuario_com_o_email = uow.repo_consulta.consultar_por_email(
@@ -33,8 +35,8 @@ def criar_usuario(
 
         senha = comando.senha
 
-        if encriptador:
-            senha = encriptador.encriptar_senha(senha=comando.senha)
+        if encriptar_senha:
+            senha = EncriptadorDeSenha().encriptar_senha(senha=comando.senha)
             senha = Senha(senha.decode())
 
         novo_usuario = Usuario.criar(
@@ -87,7 +89,9 @@ def alterar_email_do_usuario(
     comando: AlterarEmailDoUsuario, uow: AbstractUnitOfWork
 ) -> Usuario:
     with uow(Dominio.usuarios):
-        usuario = uow.repo_consulta.consultar_por_email(email=Email(comando.novo_email))
+        usuario: Usuario = uow.repo_consulta.consultar_por_email(
+            email=Email(comando.novo_email)
+        )
 
         # email ja utilizado por usuario com id diferente
         if usuario and usuario.id != comando.usuario_id:
@@ -104,3 +108,7 @@ def alterar_email_do_usuario(
         uow.commit()
 
     return usuario_alterado
+
+
+def enviar_email_de_confirmacao(evento: EmailAlterado, uow: AbstractUnitOfWork):
+    print(f"==== ENVIOU O E-MAIL PARA {evento.novo_email} ====")

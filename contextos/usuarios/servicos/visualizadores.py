@@ -4,7 +4,7 @@ from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.tipos_basicos.texto import Email
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 
 
 def consultar_usuario_por_id(

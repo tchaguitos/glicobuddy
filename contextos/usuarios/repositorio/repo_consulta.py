@@ -5,7 +5,7 @@ from libs.repositorio import RepositorioConsulta
 from libs.tipos_basicos.texto import Email
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 
 
 class RepoConsultaUsuarios(RepositorioConsulta):

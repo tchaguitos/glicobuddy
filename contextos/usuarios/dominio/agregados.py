@@ -1,17 +1,20 @@
 from datetime import date, datetime
 
+from libs.ddd import Agregado
+
 from dataclasses import dataclass, field
 from dataclass_type_validator import dataclass_validate
 
 from libs.tipos_basicos.texto import Nome, Email, Senha
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
+from contextos.usuarios.dominio.eventos import EmailAlterado
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 
 @dataclass_validate
 @dataclass
-class Usuario:
+class Usuario(Agregado):
     email: Email
     senha: Senha
     nome_completo: Nome
@@ -19,8 +22,7 @@ class Usuario:
     id: IdUsuario = field(init=False, default_factory=IdUsuario)
     data_criacao_utc: datetime  # TODO: criar contexto de auditoria?
 
-    def __hash__(self):
-        return hash(self.id)
+    eventos = []
 
     class UsuarioInvalido(Exception):
         pass
@@ -52,5 +54,15 @@ class Usuario:
 
     def alterar_email(self, email: Email) -> "Usuario":
         self.email = email
-        # TODO: lancar evento "email alterado"
+
+        self.adicionar_evento(
+            evento=EmailAlterado(
+                usuario_id=IdUsuario(self.id),
+                novo_email=email,
+            ),
+        )
+
         return self
+
+    def __hash__(self):
+        return hash(self.id)

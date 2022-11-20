@@ -5,10 +5,11 @@ from datetime import datetime, date
 
 from libs.tipos_basicos.texto import Email, Senha, Nome, EmailInvalido
 
-from contextos.usuarios.dominio.entidades import Usuario
+from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.dominio.objetos_de_valor import (
     ValoresParaEdicaoDeUsuario,
 )
+from contextos.usuarios.dominio.eventos import EmailAlterado
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -90,8 +91,19 @@ def test_alterar_email_usuario():
 
     assert usuario.email == Email("tchaguitos@teste.com")
 
+    assert usuario.eventos == []
+    assert len(usuario.eventos) == 0
+
     usuario = usuario.alterar_email(
         email=Email("tchaguitos@gmail.com"),
     )
+
+    assert len(usuario.eventos) == 1
+    assert usuario.eventos == [
+        EmailAlterado(
+            usuario_id=usuario.id,
+            novo_email=Email("tchaguitos@gmail.com"),
+        )
+    ]
 
     assert usuario.email == Email("tchaguitos@gmail.com")

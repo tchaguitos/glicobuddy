@@ -4,6 +4,8 @@ from uuid import uuid4
 from datetime import datetime
 from freezegun import freeze_time
 
+from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
+
 from contextos.glicemias.dominio.entidades import (
     Glicemia,
     Auditoria,
@@ -24,7 +26,7 @@ def test_criar_glicemia():
         horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
         auditoria=Auditoria(
-            criado_por=id_usuario,
+            criado_por=IdUsuario(id_usuario),
             data_criacao=hora_atual,
             ultima_vez_editado_por=None,
             data_ultima_edicao=None,
@@ -38,7 +40,7 @@ def test_criar_glicemia():
         primeira_do_dia=True,
         horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
-        criado_por=id_usuario,
+        criado_por=IdUsuario(id_usuario),
     )
 
     assert glicemia_criada.id
@@ -65,7 +67,7 @@ def test_criar_glicemia_com_valores_invalidos():
             primeira_do_dia=True,
             horario_dosagem=datetime.now(),
             observacoes="primeira glicemia do dia",
-            criado_por=id_usuario,
+            criado_por=IdUsuario(id_usuario),
         )
 
         assert str(e.value) == "O valor da glicemia deve ser superior a 20mg/dl"
@@ -85,7 +87,7 @@ def test_editar_glicemia():
         primeira_do_dia=True,
         horario_dosagem=horario_dosagem,
         observacoes="primeira glicemia do dia",
-        criado_por=id_usuario,
+        criado_por=IdUsuario(id_usuario),
     )
 
     assert glicemia_criada.id
@@ -103,7 +105,7 @@ def test_editar_glicemia():
                 horario_dosagem=horario_dosagem,
                 observacoes="glicose em jejum",
             ),
-            editado_por=id_usuario,
+            editado_por=IdUsuario(id_usuario),
         )
 
     assert glicemia_editada.valor == 88
@@ -127,7 +129,7 @@ def test_editar_glicemia_com_valores_invalidos():
         primeira_do_dia=True,
         horario_dosagem=horario_dosagem,
         observacoes="primeira glicemia do dia",
-        criado_por=id_usuario,
+        criado_por=IdUsuario(id_usuario),
     )
 
     with pytest.raises(Glicemia.ValorDeGlicemiaInvalido) as e:
@@ -138,7 +140,7 @@ def test_editar_glicemia_com_valores_invalidos():
                 horario_dosagem=horario_dosagem,
                 observacoes="glicose em jejum",
             ),
-            editado_por=id_usuario,
+            editado_por=IdUsuario(id_usuario),
         )
 
         assert str(e.value) == "O valor da glicemia deve ser superior a 20mg/dl"

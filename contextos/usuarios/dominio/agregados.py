@@ -57,7 +57,7 @@ class Usuario(Agregado):
 
         self.adicionar_evento(
             evento=EmailAlterado(
-                usuario_id=self.id,
+                usuario_id=IdUsuario(self.id),
                 novo_email=email,
             ),
         )

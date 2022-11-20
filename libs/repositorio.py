@@ -1,9 +1,13 @@
 import abc
-
 from uuid import UUID
+from typing import Set
+
+from libs.ddd import Agregado
 
 
 class RepositorioDominio(abc.ABC):
+    objetos_modificados: Set[Agregado]
+
     def __init__(self, session):
         self.session = session
 

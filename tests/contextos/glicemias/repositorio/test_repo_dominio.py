@@ -2,8 +2,9 @@ from uuid import uuid4
 from datetime import datetime
 from freezegun import freeze_time
 
-from contextos.glicemias.dominio.entidades import Glicemia
+from libs.tipos_basicos.identificadores_db import IdUsuario
 
+from contextos.glicemias.dominio.entidades import Glicemia
 from contextos.glicemias.repositorio.repo_dominio import RepoDominioGlicemias
 
 
@@ -19,7 +20,7 @@ def test_repositorio_adicionar_glicemia(session):
         primeira_do_dia=True,
         horario_dosagem=datetime(2021, 8, 27, 8, 15),
         observacoes="primeira glicemia do dia",
-        criado_por=uuid4(),
+        criado_por=IdUsuario(uuid4()),
     )
 
     repo.adicionar(glicemia)
@@ -44,7 +45,7 @@ def test_repositorio_remover_glicemia(session):
         primeira_do_dia=True,
         horario_dosagem=datetime(2021, 8, 27, 8, 15),
         observacoes="primeira glicemia do dia",
-        criado_por=uuid4(),
+        criado_por=IdUsuario(uuid4()),
     )
 
     repo.adicionar(glicemia)

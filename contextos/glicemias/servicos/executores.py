@@ -29,7 +29,7 @@ def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
 
 def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
     with uow(Dominio.glicemias):
-        glicemia = uow.repo_consulta.consultar_por_id(id=comando.glicemia_id)
+        glicemia: Glicemia = uow.repo_consulta.consultar_por_id(id=comando.glicemia_id)
 
         glicemia_editada = glicemia.editar(
             editado_por=comando.editado_por,

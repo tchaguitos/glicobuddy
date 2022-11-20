@@ -41,3 +41,7 @@ class Id(UUID):
 
 class IdUsuario(Id):
     pass
+
+
+class IdGlicemia(Id):
+    pass

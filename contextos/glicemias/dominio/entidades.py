@@ -1,9 +1,10 @@
 from typing import Optional
-from uuid import UUID, uuid4
 from datetime import datetime
 
 from dataclass_type_validator import dataclass_validate
 from dataclasses import dataclass, asdict, replace, field
+
+from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
 
@@ -11,12 +12,18 @@ from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlic
 @dataclass_validate
 @dataclass
 class Auditoria:
-    criado_por: UUID  # TODO: criar classe para usuario
+    criado_por: IdUsuario
     data_criacao: datetime
-    ultima_vez_editado_por: Optional[UUID]
+    ultima_vez_editado_por: Optional[IdUsuario]
     data_ultima_edicao: Optional[datetime]
     ativo: bool = True
     deletado: bool = False
+
+    def __post_init__(self):
+        self.criado_por = IdUsuario(self.criado_por)
+
+        if self.ultima_vez_editado_por:
+            self.ultima_vez_editado_por = IdUsuario(self.ultima_vez_editado_por)
 
     def __composite_values__(self):
         return (
@@ -37,7 +44,7 @@ class Glicemia:
     primeira_do_dia: bool
     horario_dosagem: datetime
     auditoria: Auditoria
-    id: UUID = field(init=False, default_factory=uuid4)
+    id: IdGlicemia = field(init=False, default_factory=IdGlicemia)
 
     class ValorDeGlicemiaInvalido(Exception):
         pass
@@ -58,7 +65,7 @@ class Glicemia:
         horario_dosagem: datetime,
         observacoes: str,
         primeira_do_dia: bool,
-        criado_por: UUID,
+        criado_por: IdUsuario,
     ):
         """"""
         return cls(
@@ -78,7 +85,7 @@ class Glicemia:
 
     def editar(
         self,
-        editado_por: UUID,
+        editado_por: IdUsuario,
         novos_valores: ValoresParaEdicaoDeGlicemia,
     ):
         """"""
@@ -88,19 +95,15 @@ class Glicemia:
 
         return objeto_editado
 
-    def __atualizar_valores_auditoria(self, editado_por: UUID):
-        novos_valores_auditoria = {
-            "data_ultima_edicao": datetime.now(),
-            "ultima_vez_editado_por": editado_por,
-        }
+    def __atualizar_valores_auditoria(self, editado_por: IdUsuario):
+        self.auditoria.data_ultima_edicao = datetime.now()
+        self.auditoria.ultima_vez_editado_por = editado_por
 
-        auditoria = replace(self.auditoria, **novos_valores_auditoria)
-
-        self.auditoria = auditoria
+        return self.auditoria
 
     def __atualizar_valores(
         self,
-        editado_por: UUID,
+        editado_por: IdUsuario,
         novos_valores: ValoresParaEdicaoDeGlicemia,
     ):
         """"""

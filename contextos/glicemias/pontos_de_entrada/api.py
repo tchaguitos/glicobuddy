@@ -1,27 +1,31 @@
-from typing import List
-from uuid import UUID, uuid4
-from datetime import datetime
+from uuid import uuid4
 from fastapi import APIRouter
-from pydantic import BaseModel, Extra
 from fastapi import APIRouter, HTTPException
 
 from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
+from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
 from contextos.glicemias.dominio.comandos import (
     CriarGlicemia,
     EditarGlicemia,
     RemoverGlicemia,
 )
-from contextos.glicemias.servicos.executores import (
-    criar_glicemia,
-    editar_glicemia,
-    remover_glicemia,
-)
+
 from contextos.glicemias.servicos.visualizadores import (
     consultar_glicemias,
     consultar_glicemia_por_id,
 )
 from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
+
+from contextos.glicemias.pontos_de_entrada.serializadores import (
+    SerializadorDeGlicemia,
+    RetornoDaAPIDeGlicemias,
+    RetornoDeConsultaDeGlicemias,
+    SerializadorParaEdicaoDeGlicemia,
+    SerializadorParaCriacaoDeGlicemia,
+)
+
+from contextos import barramento
 
 router = APIRouter(
     tags=["glicemias"],
@@ -29,46 +33,10 @@ router = APIRouter(
 )
 
 
-class ValoresParaCriacaoDeGlicemiaAPI(BaseModel):
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
-    horario_dosagem: datetime
-
-    class Config:
-        extra = Extra.forbid
-
-
-class ValoresParaEdicaoDeGlicemiaAPI(BaseModel):
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
-    horario_dosagem: datetime
-
-    class Config:
-        extra = Extra.forbid
-
-
-class RetornoDeGlicemiasAPI(BaseModel):
-    id: UUID
-
-
-class GlicemiaAPI(BaseModel):
-    id: UUID
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
-    horario_dosagem: datetime
-
-
-class RetornoDeConsultaGlicemiasAPI(BaseModel):
-    glicemias: List[GlicemiaAPI]
-
-
 @router.get(
     "/v1/glicemias",
     status_code=200,
-    response_model=RetornoDeConsultaGlicemiasAPI,
+    response_model=RetornoDeConsultaDeGlicemias,
 )
 def listar_glicemias():
     usuario_id = uuid4()
@@ -80,9 +48,9 @@ def listar_glicemias():
         uow=uow,
     )
 
-    return RetornoDeConsultaGlicemiasAPI(
+    return RetornoDeConsultaDeGlicemias(
         glicemias=[
-            GlicemiaAPI(
+            SerializadorDeGlicemia(
                 id=glicemia.id,
                 valor=glicemia.valor,
                 observacoes=glicemia.observacoes,
@@ -97,9 +65,9 @@ def listar_glicemias():
 @router.get(
     "/v1/glicemias/{glicemia_id}",
     status_code=200,
-    response_model=RetornoDeConsultaGlicemiasAPI,
+    response_model=RetornoDeConsultaDeGlicemias,
 )
-def consultar_glicemias_por_id(glicemia_id: UUID):
+def consultar_glicemias_por_id(glicemia_id: IdGlicemia):
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
@@ -115,10 +83,10 @@ def consultar_glicemias_por_id(glicemia_id: UUID):
             status_code=404, detail="Não existe glicemia com o ID informado"
         )
 
-    return RetornoDeConsultaGlicemiasAPI(
+    return RetornoDeConsultaDeGlicemias(
         glicemias=[
-            GlicemiaAPI(
-                id=glicemia.id,
+            SerializadorDeGlicemia(
+                id=IdGlicemia(glicemia.id),
                 valor=glicemia.valor,
                 observacoes=glicemia.observacoes,
                 primeira_do_dia=glicemia.primeira_do_dia,
@@ -131,73 +99,82 @@ def consultar_glicemias_por_id(glicemia_id: UUID):
 @router.post(
     "/v1/glicemias",
     status_code=201,
-    response_model=RetornoDeGlicemiasAPI,
+    response_model=RetornoDaAPIDeGlicemias,
 )
 def cadastrar_glicemia(
-    nova_glicemia: ValoresParaCriacaoDeGlicemiaAPI,
+    nova_glicemia: SerializadorParaCriacaoDeGlicemia,
 ):
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    glicemia_criada = criar_glicemia(
-        comando=CriarGlicemia(
-            valor=nova_glicemia.valor,
-            observacoes=nova_glicemia.observacoes,
-            primeira_do_dia=nova_glicemia.primeira_do_dia,
-            horario_dosagem=nova_glicemia.horario_dosagem,
-            criado_por=usuario_id,
-        ),
-        uow=uow,
-    )
+    try:
+        glicemia_criada = bus.tratar_mensagem(
+            mensagem=CriarGlicemia(
+                valor=nova_glicemia.valor,
+                observacoes=nova_glicemia.observacoes,
+                primeira_do_dia=nova_glicemia.primeira_do_dia,
+                horario_dosagem=nova_glicemia.horario_dosagem,
+                criado_por=IdUsuario(usuario_id),
+            ),
+        )
 
-    return RetornoDeGlicemiasAPI(id=glicemia_criada.id)
+        return RetornoDaAPIDeGlicemias(id=glicemia_criada.id)
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch(
     "/v1/glicemias/{glicemia_id}",
     status_code=200,
-    response_model=RetornoDeGlicemiasAPI,
+    response_model=RetornoDaAPIDeGlicemias,
 )
 def atualizar_glicemia(
-    glicemia_id: UUID, novos_valores: ValoresParaEdicaoDeGlicemiaAPI
+    glicemia_id: IdGlicemia,
+    novos_valores: SerializadorParaEdicaoDeGlicemia,
 ):
     # TODO: receber o usuário por meio da requisicao
     usuario_id = uuid4()
 
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    glicemia_editada = editar_glicemia(
-        comando=EditarGlicemia(
-            glicemia_id=glicemia_id,
-            novos_valores=ValoresParaEdicaoDeGlicemia(
-                valor=novos_valores.valor,
-                observacoes=novos_valores.observacoes,
-                primeira_do_dia=novos_valores.primeira_do_dia,
-                horario_dosagem=novos_valores.horario_dosagem,
+    try:
+        glicemia_editada = bus.tratar_mensagem(
+            mensagem=EditarGlicemia(
+                glicemia_id=IdGlicemia(glicemia_id),
+                novos_valores=ValoresParaEdicaoDeGlicemia(
+                    valor=novos_valores.valor,
+                    observacoes=novos_valores.observacoes,
+                    primeira_do_dia=novos_valores.primeira_do_dia,
+                    horario_dosagem=novos_valores.horario_dosagem,
+                ),
+                editado_por=IdUsuario(usuario_id),
             ),
-            editado_por=usuario_id,
-        ),
-        uow=uow,
-    )
+        )
 
-    return RetornoDeGlicemiasAPI(id=glicemia_editada.id)
+        return RetornoDaAPIDeGlicemias(id=glicemia_editada.id)
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.delete(
     "/v1/glicemias/{glicemia_id}",
     status_code=200,
-    response_model=RetornoDeGlicemiasAPI,
+    response_model=RetornoDaAPIDeGlicemias,
 )
-def deletar_glicemia(glicemia_id: UUID):
+def deletar_glicemia(glicemia_id: IdGlicemia):
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    id_glicemia_removida = remover_glicemia(
-        comando=RemoverGlicemia(
-            glicemia_id=glicemia_id,
+    id_glicemia_removida = bus.tratar_mensagem(
+        mensagem=RemoverGlicemia(
+            glicemia_id=IdGlicemia(glicemia_id),
         ),
-        uow=uow,
     )
 
-    return RetornoDeGlicemiasAPI(id=id_glicemia_removida)
+    return RetornoDaAPIDeGlicemias(id=id_glicemia_removida)

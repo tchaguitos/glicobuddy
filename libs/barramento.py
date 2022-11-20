@@ -84,6 +84,7 @@ class MessageBus:
                     comando.__class__.__name__,
                 )
                 logger.exception(e)
+                raise e
 
             return resultado_do_comando
 

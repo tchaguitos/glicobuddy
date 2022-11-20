@@ -11,16 +11,8 @@ from contextos.usuarios.dominio.comandos import (
     AutenticarUsuario,
     AlterarEmailDoUsuario,
 )
-from contextos.usuarios.servicos.executores import (
-    criar_usuario,
-    editar_usuario,
-    autenticar_usuario,
-    alterar_email_do_usuario,
-)
 
 from contextos.usuarios.servicos.visualizadores import consultar_usuario_por_id
-
-from contextos.usuarios.adaptadores.encriptador import EncriptadorDeSenha
 from contextos.usuarios.dominio.objetos_de_valor import ValoresParaEdicaoDeUsuario
 
 from contextos.usuarios.pontos_de_entrada.serializadores import (
@@ -32,6 +24,8 @@ from contextos.usuarios.pontos_de_entrada.serializadores import (
     SerializadorParaCriacaoDeUsuario,
     SerializadorParaAutenticarUsuario,
 )
+
+from contextos import barramento
 
 router = APIRouter(
     tags=["usuários"],
@@ -49,14 +43,14 @@ def login(
 ):
 
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
     try:
-        token_gerado = autenticar_usuario(
-            comando=AutenticarUsuario(
+        token_gerado = bus.executar_mensagem(
+            mensagem=AutenticarUsuario(
                 email=Email(dados_para_login.email),
                 senha=Senha(dados_para_login.senha),
-            ),
-            uow=uow,
+            )
         )
 
         return RetornoDaAutenticacao(
@@ -78,16 +72,15 @@ def cadastrar_usuario(
 ):
 
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    usuario_criado = criar_usuario(
-        comando=CriarUsuario(
+    usuario_criado = bus.executar_mensagem(
+        mensagem=CriarUsuario(
             email=Email(novo_usuario.email),
             senha=Senha(novo_usuario.senha),
             nome_completo=Nome(novo_usuario.nome_completo),
             data_de_nascimento=novo_usuario.data_de_nascimento,
         ),
-        uow=uow,
-        encriptador=EncriptadorDeSenha(),
     )
 
     return RetornoDaAPIDeUsuarios(id=usuario_criado.id)
@@ -102,9 +95,10 @@ def atualizar_usuario(
     usuario_id: IdUsuario, novos_valores: SerializadorParaEdicaoDeUsuario
 ):
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    usuario_editado = editar_usuario(
-        comando=EditarUsuario(
+    usuario_editado = bus.executar_mensagem(
+        mensagem=EditarUsuario(
             usuario_id=IdUsuario(usuario_id),
             novos_valores=ValoresParaEdicaoDeUsuario(
                 nome_completo=Nome(novos_valores.nome_completo),
@@ -112,7 +106,6 @@ def atualizar_usuario(
             ),
             editado_por=IdUsuario(usuario_id),
         ),
-        uow=uow,
     )
 
     return RetornoDaAPIDeUsuarios(id=usuario_editado.id)
@@ -127,13 +120,13 @@ def atualizar_email_do_usuario(
     usuario_id: IdUsuario, novos_valores: SerializadorParaAlteracaoDeEmail
 ):
     uow = SqlAlchemyUnitOfWork()
+    bus = barramento.bootstrap(uow=uow)
 
-    usuario_com_email_alterado = alterar_email_do_usuario(
-        comando=AlterarEmailDoUsuario(
+    usuario_com_email_alterado = bus.executar_mensagem(
+        mensagem=AlterarEmailDoUsuario(
             usuario_id=IdUsuario(usuario_id),
             novo_email=Email(novos_valores.novo_email),
         ),
-        uow=uow,
     )
 
     return RetornoDaAPIDeUsuarios(id=usuario_com_email_alterado.id)

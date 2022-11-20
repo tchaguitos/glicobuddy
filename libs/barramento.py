@@ -33,7 +33,7 @@ class MessageBus:
         self.eventos_e_executores = eventos_e_executores
         self.comandos_e_executores = comandos_e_executores
 
-    def executar_mensagem(self, mensagem: Mensagem):
+    def tratar_mensagem(self, mensagem: Mensagem):
         self.fila_de_mensagens = [mensagem]
         self.resultado_do_comando = None
 

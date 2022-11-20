@@ -46,7 +46,7 @@ def login(
     bus = barramento.bootstrap(uow=uow)
 
     try:
-        token_gerado = bus.executar_mensagem(
+        token_gerado = bus.tratar_mensagem(
             mensagem=AutenticarUsuario(
                 email=Email(dados_para_login.email),
                 senha=Senha(dados_para_login.senha),
@@ -75,7 +75,7 @@ def cadastrar_usuario(
     bus = barramento.bootstrap(uow=uow)
 
     try:
-        usuario_criado = bus.executar_mensagem(
+        usuario_criado = bus.tratar_mensagem(
             mensagem=CriarUsuario(
                 email=Email(novo_usuario.email),
                 senha=Senha(novo_usuario.senha),
@@ -104,7 +104,7 @@ def atualizar_usuario(
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
 
-    usuario_editado = bus.executar_mensagem(
+    usuario_editado = bus.tratar_mensagem(
         mensagem=EditarUsuario(
             usuario_id=IdUsuario(usuario_id),
             novos_valores=ValoresParaEdicaoDeUsuario(
@@ -130,7 +130,7 @@ def atualizar_email_do_usuario(
     bus = barramento.bootstrap(uow=uow)
 
     try:
-        usuario_com_email_alterado = bus.executar_mensagem(
+        usuario_com_email_alterado = bus.tratar_mensagem(
             mensagem=AlterarEmailDoUsuario(
                 usuario_id=IdUsuario(usuario_id),
                 novo_email=Email(novos_valores.novo_email),

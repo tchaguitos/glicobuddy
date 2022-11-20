@@ -18,6 +18,7 @@ class RepoDominioUsuarios(RepositorioDominio):
         self.session.add(usuario)
 
     def atualizar(self, usuario: Usuario):
+        self.objetos_modificados.add(usuario)
         self.session.merge(usuario)
 
     def remover(self, usuario: Usuario):

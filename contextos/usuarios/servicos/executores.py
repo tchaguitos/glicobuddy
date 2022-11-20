@@ -111,4 +111,4 @@ def alterar_email_do_usuario(
 
 
 def enviar_email_de_confirmacao(evento: EmailAlterado, uow: AbstractUnitOfWork):
-    print("==== ENVIOU O E-MAIL ====")
+    print(f"==== ENVIOU O E-MAIL PARA {evento.novo_email} ====")

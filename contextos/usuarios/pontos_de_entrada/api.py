@@ -74,16 +74,23 @@ def cadastrar_usuario(
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
 
-    usuario_criado = bus.executar_mensagem(
-        mensagem=CriarUsuario(
-            email=Email(novo_usuario.email),
-            senha=Senha(novo_usuario.senha),
-            nome_completo=Nome(novo_usuario.nome_completo),
-            data_de_nascimento=novo_usuario.data_de_nascimento,
-        ),
-    )
+    try:
+        usuario_criado = bus.executar_mensagem(
+            mensagem=CriarUsuario(
+                email=Email(novo_usuario.email),
+                senha=Senha(novo_usuario.senha),
+                nome_completo=Nome(novo_usuario.nome_completo),
+                data_de_nascimento=novo_usuario.data_de_nascimento,
+            ),
+        )
 
-    return RetornoDaAPIDeUsuarios(id=usuario_criado.id)
+        return RetornoDaAPIDeUsuarios(id=usuario_criado.id)
+
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Não foi possível criar o usuário",
+        )
 
 
 @router.patch(
@@ -122,14 +129,21 @@ def atualizar_email_do_usuario(
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
 
-    usuario_com_email_alterado = bus.executar_mensagem(
-        mensagem=AlterarEmailDoUsuario(
-            usuario_id=IdUsuario(usuario_id),
-            novo_email=Email(novos_valores.novo_email),
-        ),
-    )
+    try:
+        usuario_com_email_alterado = bus.executar_mensagem(
+            mensagem=AlterarEmailDoUsuario(
+                usuario_id=IdUsuario(usuario_id),
+                novo_email=Email(novos_valores.novo_email),
+            ),
+        )
 
-    return RetornoDaAPIDeUsuarios(id=usuario_com_email_alterado.id)
+        return RetornoDaAPIDeUsuarios(id=usuario_com_email_alterado.id)
+
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Não foi possível alterar o e-mail do usuário",
+        )
 
 
 @router.get(

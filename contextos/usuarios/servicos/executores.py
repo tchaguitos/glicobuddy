@@ -21,7 +21,7 @@ from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticac
 def criar_usuario(
     comando: CriarUsuario,
     uow: AbstractUnitOfWork,
-    encriptador: Optional[EncriptadorDeSenha] = None,
+    encriptar_senha: Optional[bool] = True,
 ) -> Usuario:
     with uow(Dominio.usuarios):
         ja_existe_usuario_com_o_email = uow.repo_consulta.consultar_por_email(
@@ -35,8 +35,8 @@ def criar_usuario(
 
         senha = comando.senha
 
-        if encriptador:
-            senha = encriptador.encriptar_senha(senha=comando.senha)
+        if encriptar_senha:
+            senha = EncriptadorDeSenha().encriptar_senha(senha=comando.senha)
             senha = Senha(senha.decode())
 
         novo_usuario = Usuario.criar(

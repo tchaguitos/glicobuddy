@@ -92,6 +92,7 @@ def test_criar_usuario():
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
+        encriptar_senha=False,
     )
 
     assert uow.committed is True
@@ -115,8 +116,6 @@ def test_criar_usuario_com_senha_encriptada():
 
     assert len(registros_no_banco) == 0
 
-    encriptador = EncriptadorDeSenha()
-
     usuario_criado = criar_usuario(
         comando=CriarUsuario(
             email=Email("tchaguitos@gmail.com"),
@@ -125,7 +124,7 @@ def test_criar_usuario_com_senha_encriptada():
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
-        encriptador=encriptador,
+        encriptar_senha=True,
     )
 
     assert uow.committed is True
@@ -139,7 +138,7 @@ def test_criar_usuario_com_senha_encriptada():
     assert usuario_do_db == usuario_criado
     assert usuario_do_db.id
 
-    senha_eh_valida = encriptador.verificar_senha(
+    senha_eh_valida = EncriptadorDeSenha().verificar_senha(
         senha_para_verificar=Senha("abc123"),
         senha_do_usuario=usuario_do_db.senha,
     )
@@ -226,7 +225,6 @@ def test_autenticar_usuario():
             data_de_nascimento=date(1995, 8, 27),
         ),
         uow=uow,
-        encriptador=EncriptadorDeSenha(),
     )
 
     token = autenticar_usuario(

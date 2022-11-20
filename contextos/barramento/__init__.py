@@ -40,10 +40,10 @@ def coletar_executores_em_todos_os_contextos():
 def bootstrap(
     uow: AbstractUnitOfWork,
 ) -> MessageBus:
-    """"""
-
-    if uow is None:
-        uow = SqlAlchemyUnitOfWork()
+    """
+    Função responsável por instanciar o Message Bus com todos os comandos e
+    eventos de todos os contextos da aplicação
+    """
 
     comandos_e_executores = COMANDOS_E_EXECUTORES
     eventos_e_executores = EVENTOS_E_EXECUTORES

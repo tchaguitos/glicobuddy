@@ -18,7 +18,7 @@ def coletar_executores_em_todos_os_contextos():
         for classe, executores in getattr(contexto, "COMANDOS_E_EXECUTORES").items():
             if classe in comandos_e_executores:
                 raise ValueError(
-                    "Deve existir apenas um comando na lista de comandos e executores"
+                    "Cada comando deve estar na lista de comandos e executores apenas uma vez"
                 )
 
             comandos_e_executores[classe] = executores

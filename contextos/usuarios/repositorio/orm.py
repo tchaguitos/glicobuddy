@@ -18,7 +18,7 @@ usuario = Table(
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
     Column("email", String(155)),
-    Column("senha", String(75)),
+    Column("senha", String(255)),
     Column("nome_completo", String(255)),
     Column("data_de_nascimento", Date),
     Column("data_criacao_utc", DateTime, default=datetime.utcnow()),

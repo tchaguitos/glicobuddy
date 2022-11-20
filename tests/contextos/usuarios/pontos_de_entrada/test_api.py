@@ -1,4 +1,4 @@
-import pytest
+from main import app
 
 from uuid import uuid4
 from fastapi.testclient import TestClient
@@ -6,9 +6,6 @@ from fastapi.testclient import TestClient
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from contextos.usuarios.dominio.agregados import Email, Usuario
-
-from main import app
 
 client = TestClient(app)
 
@@ -34,11 +31,56 @@ def test_criar_usuario(session):
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_login(session):
+    data_de_nascimento = date(1995, 8, 27)
+
+    usuario_a_ser_criado = {
+        "email": "login@teste.com",
+        "senha": "senha123",
+        "nome_completo": "Nome completo",
+        "data_de_nascimento": str(data_de_nascimento),
+    }
+
+    response = client.post(
+        "/v1/usuarios",
+        json=usuario_a_ser_criado,
+    )
+
+    assert "id" in response.json()
+    assert response.status_code == 201
+
+    dados_para_login = {
+        "email": "login@teste.com",
+        "senha": "senha123",
+    }
+
+    response = client.post(
+        "/v1/usuarios/login",
+        json=dados_para_login,
+    )
+
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+    assert response.json().get("token_type") == "jwt"
+
+    response = client.post(
+        "/v1/usuarios/login",
+        json={
+            "email": "login@teste.com",
+            "senha": "senha123errada",
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json().get("detail") == "Usuário ou senha incorretos"
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_editar_usuario(session):
     data_de_nascimento = date(1995, 8, 27)
 
     usuario_a_ser_criado = {
-        "email": "nome.completo@teste.com.br",
+        "email": "editar.nome@teste.com",
         "senha": "senha123",
         "nome_completo": "Nome completo",
         "data_de_nascimento": str(data_de_nascimento),
@@ -68,7 +110,7 @@ def test_alterar_email_do_usuario(session):
     data_de_nascimento = date(1995, 8, 27)
 
     usuario_a_ser_criado = {
-        "email": "nome-teste@teste.com.br",
+        "email": "nome_teste@teste.com",
         "senha": "senha123",
         "nome_completo": "Nome completo",
         "data_de_nascimento": str(data_de_nascimento),
@@ -84,7 +126,7 @@ def test_alterar_email_do_usuario(session):
 
     email_do_usuario = response.json().get("email")
 
-    assert email_do_usuario == "nome-teste@teste.com.br"
+    assert email_do_usuario == "nome_teste@teste.com"
 
     response = client.patch(
         f"/v1/usuarios/{usuario_id}/alterar-email",

@@ -1,4 +1,3 @@
-from uuid import UUID
 from typing import Set, Optional
 from freezegun import freeze_time
 from datetime import date, datetime
@@ -6,7 +5,10 @@ from datetime import date, datetime
 from libs.unidade_de_trabalho import AbstractUnitOfWork
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
-from contextos.usuarios.dominio.agregados import Usuario, Email
+from libs.tipos_basicos.texto import Email, Senha, Nome
+from libs.tipos_basicos.identificadores_db import IdUsuario
+
+from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.servicos.visualizadores import (
     consultar_usuario_por_id,
     consultar_usuario_por_email,
@@ -34,8 +36,10 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
     def consultar_todos(self):
         yield from self.__usuarios
 
-    def consultar_por_id(self, id: UUID):
-        return next((usuario for usuario in self.__usuarios if usuario.id == id), None)
+    def consultar_por_id(self, id_usuario: IdUsuario):
+        return next(
+            (usuario for usuario in self.__usuarios if usuario.id == id_usuario), None
+        )
 
     def consultar_por_email(self, email: Email):
         return next(
@@ -65,8 +69,8 @@ def test_consultar_usuario_por_id():
 
     usuario_criado = Usuario.criar(
         email=Email("tchaguitos@gmail.com"),
-        senha="abc123",
-        nome_completo="Thiago Brasil",
+        senha=Senha("abc123"),
+        nome_completo=Nome("Thiago Brasil"),
         data_de_nascimento=date(1995, 8, 27),
     )
 
@@ -89,8 +93,8 @@ def test_consultar_usuario_por_email():
 
     usuario_criado = Usuario.criar(
         email=Email("tchaguitos@gmail.com"),
-        senha="abc123",
-        nome_completo="Thiago Brasil",
+        senha=Senha("abc123"),
+        nome_completo=Nome("Thiago Brasil"),
         data_de_nascimento=date(1995, 8, 27),
     )
 

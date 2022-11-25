@@ -23,9 +23,8 @@ def test_gerador_de_token():
 
     payload = GeradorDeToken.verificar_token(token=token)
 
-    assert payload == {
-        "id": str(usuario.id),
-        "email": usuario.email,
-        "nome_completo": usuario.nome_completo,
-        "data_de_nascimento": usuario.data_de_nascimento.strftime("%d/%m/%Y"),
-    }
+    assert payload.get("id")
+    assert payload.get("exp")
+    assert payload.get("email")
+    assert payload.get("nome_completo")
+    assert payload.get("data_de_nascimento")

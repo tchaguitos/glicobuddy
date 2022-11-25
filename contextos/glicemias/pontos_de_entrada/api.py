@@ -1,9 +1,10 @@
 from uuid import uuid4
-from fastapi import APIRouter
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter, HTTPException, Depends
 
 from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
+from libs.pontos_de_entrada import retornar_usuario_logado
 
 from contextos.glicemias.dominio.comandos import (
     CriarGlicemia,
@@ -27,6 +28,8 @@ from contextos.glicemias.pontos_de_entrada.serializadores import (
 
 from contextos import barramento
 
+from contextos.usuarios.pontos_de_entrada.serializadores import SerializadorDeUsuario
+
 router = APIRouter(
     tags=["glicemias"],
     responses={404: {"description": "Not found"}},
@@ -38,8 +41,10 @@ router = APIRouter(
     status_code=200,
     response_model=RetornoDeConsultaDeGlicemias,
 )
-def listar_glicemias():
-    usuario_id = uuid4()
+def listar_glicemias(
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
+):
+    usuario_id = usuario_logado.id
 
     uow = SqlAlchemyUnitOfWork()
 
@@ -67,8 +72,11 @@ def listar_glicemias():
     status_code=200,
     response_model=RetornoDeConsultaDeGlicemias,
 )
-def consultar_glicemias_por_id(glicemia_id: IdGlicemia):
-    usuario_id = uuid4()
+def consultar_glicemias_por_id(
+    glicemia_id: IdGlicemia,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
+):
+    usuario_id = usuario_logado.id
 
     uow = SqlAlchemyUnitOfWork()
 
@@ -103,9 +111,9 @@ def consultar_glicemias_por_id(glicemia_id: IdGlicemia):
 )
 def cadastrar_glicemia(
     nova_glicemia: SerializadorParaCriacaoDeGlicemia,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    # TODO: receber o usuário por meio da requisicao
-    usuario_id = uuid4()
+    usuario_id = usuario_logado.id
 
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
@@ -135,9 +143,9 @@ def cadastrar_glicemia(
 def atualizar_glicemia(
     glicemia_id: IdGlicemia,
     novos_valores: SerializadorParaEdicaoDeGlicemia,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    # TODO: receber o usuário por meio da requisicao
-    usuario_id = uuid4()
+    usuario_id = usuario_logado.id
 
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
@@ -167,7 +175,10 @@ def atualizar_glicemia(
     status_code=200,
     response_model=RetornoDaAPIDeGlicemias,
 )
-def deletar_glicemia(glicemia_id: IdGlicemia):
+def deletar_glicemia(
+    glicemia_id: IdGlicemia,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
+):
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
 

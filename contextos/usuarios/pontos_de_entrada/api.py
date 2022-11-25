@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
 
 from libs.tipos_basicos.texto import Nome, Email, Senha
 from libs.tipos_basicos.identificadores_db import IdUsuario
+
+from libs.pontos_de_entrada import retornar_usuario_logado
 
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
@@ -55,7 +57,7 @@ def login(
 
         return RetornoDaAutenticacao(
             access_token=token_gerado,
-            token_type="jwt",
+            token_type="bearer",
         )
 
     except Exception:
@@ -99,19 +101,20 @@ def cadastrar_usuario(
     response_model=RetornoDaAPIDeUsuarios,
 )
 def atualizar_usuario(
-    usuario_id: IdUsuario, novos_valores: SerializadorParaEdicaoDeUsuario
+    novos_valores: SerializadorParaEdicaoDeUsuario,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
 
     usuario_editado = bus.tratar_mensagem(
         mensagem=EditarUsuario(
-            usuario_id=IdUsuario(usuario_id),
+            usuario_id=IdUsuario(usuario_logado.id),
             novos_valores=ValoresParaEdicaoDeUsuario(
                 nome_completo=Nome(novos_valores.nome_completo),
                 data_de_nascimento=novos_valores.data_de_nascimento,
             ),
-            editado_por=IdUsuario(usuario_id),
+            editado_por=IdUsuario(usuario_logado.id),
         ),
     )
 
@@ -124,7 +127,8 @@ def atualizar_usuario(
     response_model=RetornoDaAPIDeUsuarios,
 )
 def atualizar_email_do_usuario(
-    usuario_id: IdUsuario, novos_valores: SerializadorParaAlteracaoDeEmail
+    novos_valores: SerializadorParaAlteracaoDeEmail,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
     uow = SqlAlchemyUnitOfWork()
     bus = barramento.bootstrap(uow=uow)
@@ -132,7 +136,7 @@ def atualizar_email_do_usuario(
     try:
         usuario_com_email_alterado = bus.tratar_mensagem(
             mensagem=AlterarEmailDoUsuario(
-                usuario_id=IdUsuario(usuario_id),
+                usuario_id=IdUsuario(usuario_logado.id),
                 novo_email=Email(novos_valores.novo_email),
             ),
         )
@@ -170,3 +174,10 @@ def consultar_usuarios_por_id(usuario_id: IdUsuario):
         nome_completo=usuario.nome_completo,
         data_de_nascimento=usuario.data_de_nascimento,
     )
+
+
+@router.get("/v1/perfil", response_model=SerializadorDeUsuario)
+def consultar_usuario_logado(
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
+):
+    return usuario_logado

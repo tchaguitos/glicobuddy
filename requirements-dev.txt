@@ -28,7 +28,6 @@ py==1.11.0
 pyasn1==0.4.8
 pycparser==2.21
 pydantic==1.8.2
-PyJWT==2.6.0
 pyparsing==2.4.7
 pytest==6.2.5
 pytest-cov==3.0.0

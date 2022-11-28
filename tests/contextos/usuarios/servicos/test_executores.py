@@ -239,11 +239,7 @@ def test_autenticar_usuario():
 
     payload = GeradorDeToken.verificar_token(token=token)
 
-    assert payload.get("id")
-    assert payload.get("exp")
-    assert payload.get("email")
-    assert payload.get("nome_completo")
-    assert payload.get("data_de_nascimento")
+    assert all([valor for valor in payload.values()])
 
     with pytest.raises(UsuarioNaoEncontrado) as e:
         autenticar_usuario(

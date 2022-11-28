@@ -61,7 +61,7 @@ def test_login(session):
 
     assert response.status_code == 200
     assert "access_token" in response.json()
-    assert response.json().get("token_type") == "bearer"
+    assert response.json().get("token_type") == "Bearer"
 
     response = client.post(
         "/v1/usuarios/login",

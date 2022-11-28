@@ -25,11 +25,7 @@ def test_gerador_de_token():
 
     payload = GeradorDeToken.verificar_token(token=token)
 
-    assert payload.get("id")
-    assert payload.get("exp")
-    assert payload.get("email")
-    assert payload.get("nome_completo")
-    assert payload.get("data_de_nascimento")
+    assert all([valor for valor in payload.values()])
 
 
 @freeze_time(datetime(2021, 8, 27, 4, 20))

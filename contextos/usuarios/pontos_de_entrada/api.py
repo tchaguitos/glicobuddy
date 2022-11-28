@@ -57,7 +57,7 @@ def login(
 
         return RetornoDaAutenticacao(
             access_token=token_gerado,
-            token_type="bearer",
+            token_type="Bearer",
         )
 
     except Exception:

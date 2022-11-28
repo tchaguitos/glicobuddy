@@ -20,7 +20,7 @@ def usuario_salvo():
     senha = EncriptadorDeSenha().encriptar_senha(senha="senha123")
     usuario = Usuario.criar(
         email=Email("mock.usuario@teste.com"),
-        senha=Senha(senha.decode()),
+        senha=Senha(senha),
         nome_completo=Nome("Mock de usuario"),
         data_de_nascimento=date(1995, 8, 26),
     )

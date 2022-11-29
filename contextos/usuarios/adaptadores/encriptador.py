@@ -8,8 +8,6 @@ class Encriptador(ABC):
     as senhas dos usuários do sistema
     """
 
-    contexto: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
     @abstractmethod
     def _encriptar(self, texto: str) -> str:
         raise NotImplementedError()
@@ -24,7 +22,12 @@ class Encriptador(ABC):
 
 
 class EncriptadorDeSenha(Encriptador):
-    """"""
+    """
+    Classe responsável por encriptar senhas
+    """
+
+    # TODO: criar abstracao para ser possivel alterar o contexto ao iniciar a classe
+    contexto: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def encriptar_senha(self, senha: str) -> str:
         senha_encriptada = self._encriptar(texto=senha)

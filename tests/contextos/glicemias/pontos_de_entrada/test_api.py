@@ -13,7 +13,7 @@ client = TestClient(app)
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_consultar_glicemias(session):
+def test_consultar_glicemias(session, usuario_autenticado):
     horario_dosagem = datetime.now()
 
     glicemia_a_criar = [
@@ -31,13 +31,19 @@ def test_consultar_glicemias(session):
         },
     ]
 
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
+
     for glicemia in glicemia_a_criar:
         response = client.post(
             "/v1/glicemias",
             json=glicemia,
+            headers=headers,
         )
 
-    response = client.get("/v1/glicemias")
+    response = client.get(
+        "/v1/glicemias",
+        headers=headers,
+    )
 
     assert response.status_code == 200
     assert len(response.json().get("glicemias")) == 2
@@ -50,17 +56,23 @@ def test_consultar_glicemias(session):
             "primeira_do_dia": False,
             "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
         },
+        headers=headers,
     )
 
-    response = client.get("/v1/glicemias")
+    response = client.get(
+        "/v1/glicemias",
+        headers=headers,
+    )
 
     assert response.status_code == 200
     assert len(response.json().get("glicemias")) == 3
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_consultar_glicemias_por_id(session):
+def test_consultar_glicemias_por_id(session, usuario_autenticado):
     horario_dosagem = datetime.now()
+
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
 
     response = client.post(
         "/v1/glicemias",
@@ -70,11 +82,15 @@ def test_consultar_glicemias_por_id(session):
             "primeira_do_dia": False,
             "horario_dosagem": str(horario_dosagem + timedelta(hours=4)),
         },
+        headers=headers,
     )
 
     glicemia_id = response.json().get("id")
 
-    response = client.get(f"/v1/glicemias/{glicemia_id}")
+    response = client.get(
+        f"/v1/glicemias/{glicemia_id}",
+        headers=headers,
+    )
 
     assert response.status_code == 200
     assert len(response.json().get("glicemias")) == 1
@@ -90,14 +106,17 @@ def test_consultar_glicemias_por_id(session):
         == (horario_dosagem + timedelta(hours=4)).isoformat()
     )
 
-    response = client.get(f"/v1/glicemias/{uuid4()}")
+    response = client.get(
+        f"/v1/glicemias/{uuid4()}",
+        headers=headers,
+    )
 
     assert response.status_code == 404
     assert response.json().get("detail") == "Não existe glicemia com o ID informado"
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_criar_glicemia(session):
+def test_criar_glicemia(session, usuario_autenticado):
     horario_dosagem = datetime.now()
 
     glicemia_a_ser_criada = {
@@ -107,9 +126,12 @@ def test_criar_glicemia(session):
         "horario_dosagem": str(horario_dosagem),
     }
 
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
+
     response = client.post(
         "/v1/glicemias",
         json=glicemia_a_ser_criada,
+        headers=headers,
     )
 
     assert "id" in response.json()
@@ -117,7 +139,7 @@ def test_criar_glicemia(session):
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_editar_glicemia(session):
+def test_editar_glicemia(session, usuario_autenticado):
     horario_dosagem = datetime.now()
 
     glicemia_a_ser_criada = {
@@ -127,9 +149,12 @@ def test_editar_glicemia(session):
         "horario_dosagem": str(horario_dosagem),
     }
 
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
+
     response = client.post(
         "/v1/glicemias",
         json=glicemia_a_ser_criada,
+        headers=headers,
     )
 
     assert "id" in response.json()
@@ -146,6 +171,7 @@ def test_editar_glicemia(session):
     response = client.patch(
         f"/v1/glicemias/{glicemia_id}",
         json=valores_para_edicao_de_glicemia,
+        headers=headers,
     )
 
     assert "id" in response.json()
@@ -161,6 +187,7 @@ def test_editar_glicemia(session):
     response = client.patch(
         f"/v1/glicemias/{glicemia_id}",
         json=valores_para_edicao_de_glicemia,
+        headers=headers,
     )
 
     assert (
@@ -170,7 +197,7 @@ def test_editar_glicemia(session):
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_remover_glicemia(session):
+def test_remover_glicemia(session, usuario_autenticado):
     horario_dosagem = datetime.now()
 
     glicemia_a_ser_criada = {
@@ -180,9 +207,12 @@ def test_remover_glicemia(session):
         "horario_dosagem": str(horario_dosagem),
     }
 
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
+
     response = client.post(
         "/v1/glicemias",
         json=glicemia_a_ser_criada,
+        headers=headers,
     )
 
     assert "id" in response.json()
@@ -191,6 +221,7 @@ def test_remover_glicemia(session):
     glicemia_id = response.json().get("id")
     response = client.delete(
         f"/v1/glicemias/{glicemia_id}",
+        headers=headers,
     )
 
     assert "id" in response.json()

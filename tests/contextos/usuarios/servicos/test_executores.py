@@ -4,7 +4,7 @@ from typing import Set, Optional
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from libs.tipos_basicos.texto import Email, Senha, Nome
@@ -60,7 +60,7 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
         )
 
 
-class FakeUOW(AbstractUnitOfWork):
+class FakeUOW(UnidadeDeTrabalhoAbstrata):
     def __init__(self):
         repo = FakeRepo(set())
 
@@ -217,7 +217,7 @@ def test_autenticar_usuario():
     email = Email("usuario.1@teste.com")
     senha = Senha("abc123")
 
-    usuario_criado = criar_usuario(
+    criar_usuario(
         comando=CriarUsuario(
             email=email,
             senha=senha,
@@ -239,12 +239,7 @@ def test_autenticar_usuario():
 
     payload = GeradorDeToken.verificar_token(token=token)
 
-    assert payload == {
-        "id": str(usuario_criado.id),
-        "email": usuario_criado.email,
-        "nome_completo": usuario_criado.nome_completo,
-        "data_de_nascimento": usuario_criado.data_de_nascimento.strftime("%d/%m/%Y"),
-    }
+    assert all([valor for valor in payload.values()])
 
     with pytest.raises(UsuarioNaoEncontrado) as e:
         autenticar_usuario(
@@ -255,7 +250,7 @@ def test_autenticar_usuario():
             uow=uow,
         )
 
-        assert str(e) == "Usuário não encontrado"
+    assert str(e.value) == "Usuário não encontrado"
 
     with pytest.raises(ErroNaAutenticacao) as e:
         autenticar_usuario(
@@ -266,7 +261,7 @@ def test_autenticar_usuario():
             uow=uow,
         )
 
-        assert str(e) == "Usuário ou senha incorretos"
+    assert str(e.value) == "Usuário ou senha incorretos"
 
     with pytest.raises(ErroNaAutenticacao) as e:
         autenticar_usuario(
@@ -277,7 +272,7 @@ def test_autenticar_usuario():
             uow=uow,
         )
 
-        assert str(e) == "Usuário ou senha incorretos"
+    assert str(e.value) == "Usuário ou senha incorretos"
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

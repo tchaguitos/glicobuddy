@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
-from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalho
 
 from libs.tipos_basicos.texto import Nome, Email, Senha
 from libs.tipos_basicos.identificadores_db import IdUsuario
+
+from libs.pontos_de_entrada import retornar_usuario_logado
 
 from contextos.usuarios.dominio.comandos import (
     CriarUsuario,
@@ -42,7 +44,7 @@ def login(
     dados_para_login: SerializadorParaAutenticarUsuario,
 ):
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -55,7 +57,7 @@ def login(
 
         return RetornoDaAutenticacao(
             access_token=token_gerado,
-            token_type="jwt",
+            token_type="Bearer",
         )
 
     except Exception:
@@ -71,7 +73,7 @@ def cadastrar_usuario(
     novo_usuario: SerializadorParaCriacaoDeUsuario,
 ):
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -99,9 +101,12 @@ def cadastrar_usuario(
     response_model=RetornoDaAPIDeUsuarios,
 )
 def atualizar_usuario(
-    usuario_id: IdUsuario, novos_valores: SerializadorParaEdicaoDeUsuario
+    novos_valores: SerializadorParaEdicaoDeUsuario,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = SqlAlchemyUnitOfWork()
+    usuario_id = usuario_logado.id
+
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     usuario_editado = bus.tratar_mensagem(
@@ -124,9 +129,12 @@ def atualizar_usuario(
     response_model=RetornoDaAPIDeUsuarios,
 )
 def atualizar_email_do_usuario(
-    usuario_id: IdUsuario, novos_valores: SerializadorParaAlteracaoDeEmail
+    novos_valores: SerializadorParaAlteracaoDeEmail,
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = SqlAlchemyUnitOfWork()
+    usuario_id = usuario_logado.id
+
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -152,7 +160,8 @@ def atualizar_email_do_usuario(
     response_model=SerializadorDeUsuario,
 )
 def consultar_usuarios_por_id(usuario_id: IdUsuario):
-    uow = SqlAlchemyUnitOfWork()
+    # TODO: criar funcao pra bloquear endpoints por tipo de usuario
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
 
     usuario = consultar_usuario_por_id(
         uow=uow,
@@ -170,3 +179,10 @@ def consultar_usuarios_por_id(usuario_id: IdUsuario):
         nome_completo=usuario.nome_completo,
         data_de_nascimento=usuario.data_de_nascimento,
     )
+
+
+@router.get("/v1/perfil", response_model=SerializadorDeUsuario)
+def consultar_usuario_logado(
+    usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
+):
+    return usuario_logado

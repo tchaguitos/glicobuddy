@@ -1,5 +1,5 @@
 from libs.barramento import MessageBus
-from libs.unidade_de_trabalho import AbstractUnitOfWork, SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 from contextos.barramento import usuarios
 from contextos.barramento import glicemias
@@ -41,7 +41,7 @@ def coletar_executores_em_todos_os_contextos():
 
 
 def bootstrap(
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
 ) -> MessageBus:
     """
     Função responsável por instanciar o Message Bus com todos os comandos e

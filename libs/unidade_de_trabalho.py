@@ -1,6 +1,6 @@
 import abc
 
-from typing import Type, List
+from typing import Type, List, Optional
 
 from config import get_session_factory
 from sqlalchemy.orm.session import Session
@@ -8,17 +8,20 @@ from sqlalchemy.orm.session import Session
 from libs.dominio import Dominio
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
+from libs.tipos_basicos.identificadores_db import IdUsuario
+
 
 class UnidadeDeTrabalhoUtilizadaSemDominio(Exception):
     pass
 
 
-class AbstractUnitOfWork(abc.ABC):
+class UnidadeDeTrabalhoAbstrata(abc.ABC):
     committed: bool
     repo_dominio: RepositorioDominio
     repo_consulta: RepositorioConsulta
     classe_repo_dominio: Type[RepositorioDominio]
     classe_repo_consulta: Type[RepositorioConsulta]
+    usuario: Optional[IdUsuario]
 
     def __enter__(self):
         return self
@@ -57,13 +60,17 @@ class AbstractUnitOfWork(abc.ABC):
         raise NotImplementedError
 
 
-# TODO: mudar apenas para `unidade de trabalho`
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
+class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata):
     repo_dominio: RepositorioDominio
     repo_consulta: RepositorioConsulta
 
-    def __init__(self, session_factory=get_session_factory):
+    def __init__(
+        self,
+        session_factory=get_session_factory,
+        usuario: Optional[IdUsuario] = None,
+    ):
         self.session_factory = session_factory
+        self.usuario = usuario
 
     def __enter__(self):
         if not hasattr(self, "classe_repo_dominio"):

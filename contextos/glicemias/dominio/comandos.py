@@ -16,7 +16,6 @@ class CriarGlicemia(Comando):
     observacoes: str
     primeira_do_dia: bool
     horario_dosagem: datetime
-    criado_por: IdUsuario
 
 
 @dataclass_validate
@@ -24,7 +23,6 @@ class CriarGlicemia(Comando):
 class EditarGlicemia(Comando):
     glicemia_id: IdGlicemia
     novos_valores: ValoresParaEdicaoDeGlicemia
-    editado_por: IdUsuario
 
 
 @dataclass_validate

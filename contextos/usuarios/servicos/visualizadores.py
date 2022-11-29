@@ -1,5 +1,5 @@
 from libs.dominio import Dominio
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 from libs.tipos_basicos.texto import Email
 from libs.tipos_basicos.identificadores_db import IdUsuario
@@ -8,7 +8,7 @@ from contextos.usuarios.dominio.agregados import Usuario
 
 
 def consultar_usuario_por_id(
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
     usuario_id: IdUsuario,
 ) -> Usuario:
     """"""
@@ -20,7 +20,7 @@ def consultar_usuario_por_id(
 
 
 def consultar_usuario_por_email(
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
     usuario_email: Email,
 ) -> Usuario:
     """"""

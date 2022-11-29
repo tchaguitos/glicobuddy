@@ -61,7 +61,7 @@ def test_login(session):
 
     assert response.status_code == 200
     assert "access_token" in response.json()
-    assert response.json().get("token_type") == "jwt"
+    assert response.json().get("token_type") == "Bearer"
 
     response = client.post(
         "/v1/usuarios/login",
@@ -76,7 +76,7 @@ def test_login(session):
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_editar_usuario(session):
+def test_editar_usuario(session, usuario_autenticado):
     data_de_nascimento = date(1995, 8, 27)
 
     usuario_a_ser_criado = {
@@ -86,9 +86,12 @@ def test_editar_usuario(session):
         "data_de_nascimento": str(data_de_nascimento),
     }
 
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
+
     response = client.post(
         "/v1/usuarios",
         json=usuario_a_ser_criado,
+        headers=headers,
     )
 
     usuario_id = response.json().get("id")
@@ -99,6 +102,7 @@ def test_editar_usuario(session):
             "nome_completo": "Nome do meio completo",
             "data_de_nascimento": str(date(1960, 8, 27)),
         },
+        headers=headers,
     )
 
     assert "id" in response.json()
@@ -106,39 +110,36 @@ def test_editar_usuario(session):
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
-def test_alterar_email_do_usuario(session):
-    data_de_nascimento = date(1995, 8, 27)
+def test_alterar_email_do_usuario(session, usuario_autenticado):
+    headers = {"Authorization": f"Bearer {usuario_autenticado}"}
 
-    usuario_a_ser_criado = {
-        "email": "nome_teste@teste.com",
-        "senha": "senha123",
-        "nome_completo": "Nome completo",
-        "data_de_nascimento": str(data_de_nascimento),
-    }
-
-    response = client.post(
-        "/v1/usuarios",
-        json=usuario_a_ser_criado,
+    response = client.get(
+        "/v1/perfil",
+        headers=headers,
     )
-    usuario_id = response.json().get("id")
 
-    response = client.get(f"/v1/usuarios/{usuario_id}")
+    resposta = response.json()
+    email_do_usuario = resposta.get("email")
 
-    email_do_usuario = response.json().get("email")
+    assert email_do_usuario == "mock.usuario@teste.com"
 
-    assert email_do_usuario == "nome_teste@teste.com"
+    id_do_usuario = resposta.get("id")
 
     response = client.patch(
-        f"/v1/usuarios/{usuario_id}/alterar-email",
+        f"/v1/usuarios/{id_do_usuario}/alterar-email",
         json={
             "novo_email": "tchaguitos@gmail.com",
         },
+        headers=headers,
     )
 
     assert "id" in response.json()
     assert response.status_code == 200
 
-    response = client.get(f"/v1/usuarios/{usuario_id}")
+    response = client.get(
+        f"/v1/usuarios/{id_do_usuario}",
+        headers=headers,
+    )
 
     email_do_usuario = response.json().get("email")
 

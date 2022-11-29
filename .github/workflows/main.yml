@@ -3,6 +3,7 @@ on:
     branches: [ main ]
 
 env:
+  SEGREDO: TOPS3CRET
   POSTGRES_VOLUME_URL: /tmp/postgresql/data
 
 jobs:

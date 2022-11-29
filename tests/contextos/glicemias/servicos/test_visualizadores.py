@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Set, Optional
 from freezegun import freeze_time
 
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
@@ -44,14 +44,17 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
         )
 
 
-class FakeUOW(AbstractUnitOfWork):
-    def __init__(self):
+class FakeUOW(UnidadeDeTrabalhoAbstrata):
+    usuario: Optional[IdUsuario] = None
+
+    def __init__(self, usuario: Optional[IdUsuario] = None):
         repo = FakeRepo(set())
 
         self.repo_dominio = repo
         self.repo_consulta = repo
 
         self.committed = False
+        self.usuario = usuario
 
     def commit(self):
         self.committed = True
@@ -62,7 +65,7 @@ class FakeUOW(AbstractUnitOfWork):
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_consultar_glicemias():
-    uow = FakeUOW()
+    uow = FakeUOW(usuario=IdUsuario())
     usuario_id = uuid4()
 
     horario_dosagem_1 = datetime(2021, 8, 27, 10, 15)
@@ -103,7 +106,7 @@ def test_consultar_glicemias():
     for glicemia in glicemias_esperadas:
         uow.repo_dominio.adicionar(glicemia)
 
-    glicemias = list(consultar_glicemias(usuario_id=usuario_id, uow=uow))
+    glicemias = list(consultar_glicemias(uow=uow))
 
     assert len(glicemias) == 2
 
@@ -126,7 +129,7 @@ def test_consultar_glicemias():
     )
     uow.repo_dominio.adicionar(nova_glicemia)
 
-    glicemias = list(consultar_glicemias(usuario_id=usuario_id, uow=uow))
+    glicemias = list(consultar_glicemias(uow=uow))
 
     assert len(glicemias) == 3
 
@@ -194,7 +197,6 @@ def test_consultar_glicemia_por_id():
 
     glicemia = consultar_glicemia_por_id(
         glicemia_id=glicemia_esperada.id,
-        usuario_id=usuario_id,
         uow=uow,
     )
 
@@ -204,7 +206,6 @@ def test_consultar_glicemia_por_id():
 
     glicemia = consultar_glicemia_por_id(
         glicemia_id=glicemia_esperada.id,
-        usuario_id=usuario_id,
         uow=uow,
     )
 

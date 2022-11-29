@@ -5,7 +5,7 @@ from typing import Type
 from libs.dominio import Dominio
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
-from libs.unidade_de_trabalho import AbstractUnitOfWork, SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata, UnidadeDeTrabalho
 
 from contextos.usuarios.repositorio.repo_dominio import RepoDominioUsuarios
 from contextos.usuarios.repositorio.repo_consulta import RepoConsultaUsuarios
@@ -14,7 +14,7 @@ from contextos.glicemias.repositorio.repo_dominio import RepoDominioGlicemias
 from contextos.glicemias.repositorio.repo_consulta import RepoConsultaGlicemias
 
 
-class FakeUOW(AbstractUnitOfWork):
+class FakeUOW(UnidadeDeTrabalhoAbstrata):
     committed: bool = False
     repo_dominio: RepositorioDominio = None
     classe_repo_dominio: Type[RepositorioDominio] = None
@@ -28,7 +28,7 @@ class FakeUOW(AbstractUnitOfWork):
         pass
 
 
-class FakeSQLUOW(SqlAlchemyUnitOfWork):
+class FakeSQLUOW(UnidadeDeTrabalho):
     committed: bool = False
     repo_dominio: RepositorioDominio = None
     classe_repo_dominio: Type[RepositorioDominio] = None

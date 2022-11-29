@@ -3,7 +3,7 @@ import logging
 from typing import Callable, Dict, Type, Union, List
 
 from libs.ddd import Comando, Evento
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 
 logger = logging.getLogger(__name__)
@@ -19,15 +19,15 @@ class MessageBus:
 
     fila_de_mensagens: List[Mensagem]
 
-    unidade_de_trabalho: AbstractUnitOfWork
     eventos_e_executores: ExecutoresDeEventos
     comandos_e_executores: ExecutoresDeComandos
+    unidade_de_trabalho: UnidadeDeTrabalhoAbstrata
 
     def __init__(
         self,
-        unidade_de_trabalho: AbstractUnitOfWork,
         eventos_e_executores: ExecutoresDeEventos,
         comandos_e_executores: ExecutoresDeComandos,
+        unidade_de_trabalho: UnidadeDeTrabalhoAbstrata,
     ):
         self.unidade_de_trabalho = unidade_de_trabalho
         self.eventos_e_executores = eventos_e_executores
@@ -56,7 +56,7 @@ class MessageBus:
     def executar_comando(
         self,
         comando: Comando,
-        uow: AbstractUnitOfWork,
+        uow: UnidadeDeTrabalhoAbstrata,
     ):
         """"""
 
@@ -91,7 +91,7 @@ class MessageBus:
     def executar_evento(
         self,
         evento: Evento,
-        uow: AbstractUnitOfWork,
+        uow: UnidadeDeTrabalhoAbstrata,
     ):
         """"""
 

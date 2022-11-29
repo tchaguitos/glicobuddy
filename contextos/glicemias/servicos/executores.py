@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from libs.dominio import Dominio
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 from contextos.glicemias.dominio.entidades import Glicemia
 from contextos.glicemias.dominio.comandos import (
@@ -11,14 +11,14 @@ from contextos.glicemias.dominio.comandos import (
 )
 
 
-def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
+def criar_glicemia(comando: CriarGlicemia, uow: UnidadeDeTrabalhoAbstrata) -> Glicemia:
     with uow(Dominio.glicemias):
         nova_glicemia = Glicemia.criar(
             valor=comando.valor,
             horario_dosagem=comando.horario_dosagem,
             observacoes=comando.observacoes,
             primeira_do_dia=comando.primeira_do_dia,
-            criado_por=comando.criado_por,
+            criado_por=uow.usuario,
         )
 
         uow.repo_dominio.adicionar(nova_glicemia)
@@ -27,12 +27,14 @@ def criar_glicemia(comando: CriarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
     return nova_glicemia
 
 
-def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork) -> Glicemia:
+def editar_glicemia(
+    comando: EditarGlicemia, uow: UnidadeDeTrabalhoAbstrata
+) -> Glicemia:
     with uow(Dominio.glicemias):
         glicemia: Glicemia = uow.repo_consulta.consultar_por_id(id=comando.glicemia_id)
 
         glicemia_editada = glicemia.editar(
-            editado_por=comando.editado_por,
+            editado_por=uow.usuario,
             novos_valores=comando.novos_valores,
         )
 
@@ -42,7 +44,7 @@ def editar_glicemia(comando: EditarGlicemia, uow: AbstractUnitOfWork) -> Glicemi
     return glicemia_editada
 
 
-def remover_glicemia(comando: RemoverGlicemia, uow: AbstractUnitOfWork) -> UUID:
+def remover_glicemia(comando: RemoverGlicemia, uow: UnidadeDeTrabalhoAbstrata) -> UUID:
     with uow(Dominio.glicemias):
         glicemia = uow.repo_consulta.consultar_por_id(id=comando.glicemia_id)
 

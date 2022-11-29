@@ -2,7 +2,7 @@ from typing import Optional
 
 from libs.dominio import Dominio
 from libs.tipos_basicos.texto import Email, Senha
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 
 from contextos.usuarios.dominio.agregados import Usuario
 from contextos.usuarios.dominio.comandos import (
@@ -20,7 +20,7 @@ from contextos.usuarios.exceptions import UsuarioNaoEncontrado, ErroNaAutenticac
 
 def criar_usuario(
     comando: CriarUsuario,
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
     encriptar_senha: Optional[bool] = True,
 ) -> Usuario:
     with uow(Dominio.usuarios):
@@ -37,11 +37,10 @@ def criar_usuario(
 
         if encriptar_senha:
             senha = EncriptadorDeSenha().encriptar_senha(senha=comando.senha)
-            senha = Senha(senha.decode())
 
         novo_usuario = Usuario.criar(
             email=Email(comando.email),
-            senha=senha,
+            senha=Senha(senha),
             nome_completo=comando.nome_completo,
             data_de_nascimento=comando.data_de_nascimento,
         )
@@ -52,7 +51,7 @@ def criar_usuario(
     return novo_usuario
 
 
-def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
+def editar_usuario(comando: EditarUsuario, uow: UnidadeDeTrabalhoAbstrata) -> Usuario:
     with uow(Dominio.usuarios):
         usuario: Usuario = uow.repo_consulta.consultar_por_id(
             id_usuario=comando.usuario_id
@@ -66,7 +65,9 @@ def editar_usuario(comando: EditarUsuario, uow: AbstractUnitOfWork) -> Usuario:
     return usuario_editado
 
 
-def autenticar_usuario(comando: AutenticarUsuario, uow: AbstractUnitOfWork) -> Token:
+def autenticar_usuario(
+    comando: AutenticarUsuario, uow: UnidadeDeTrabalhoAbstrata
+) -> Token:
     with uow(Dominio.usuarios):
         usuario: Usuario = uow.repo_consulta.consultar_por_email(email=comando.email)
 
@@ -86,7 +87,7 @@ def autenticar_usuario(comando: AutenticarUsuario, uow: AbstractUnitOfWork) -> T
 
 
 def alterar_email_do_usuario(
-    comando: AlterarEmailDoUsuario, uow: AbstractUnitOfWork
+    comando: AlterarEmailDoUsuario, uow: UnidadeDeTrabalhoAbstrata
 ) -> Usuario:
     with uow(Dominio.usuarios):
         usuario: Usuario = uow.repo_consulta.consultar_por_email(
@@ -110,5 +111,5 @@ def alterar_email_do_usuario(
     return usuario_alterado
 
 
-def enviar_email_de_confirmacao(evento: EmailAlterado, uow: AbstractUnitOfWork):
+def enviar_email_de_confirmacao(evento: EmailAlterado, uow: UnidadeDeTrabalhoAbstrata):
     print(f"==== ENVIOU O E-MAIL PARA {evento.novo_email} ====")

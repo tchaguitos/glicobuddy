@@ -1,3 +1,5 @@
+import os
+
 from typing import Dict, Any
 from datetime import datetime, timedelta
 from jose import jwt, ExpiredSignatureError
@@ -6,8 +8,7 @@ from contextos.usuarios.dominio.agregados import Usuario
 
 ALGORITMO = "HS256"
 MINUTOS_ATE_EXPIRAR = 24 * 60
-# TODO: configurar variaveis de ambiente
-SEGREDO = "73f8a6d421cffdd587c4c8489124760b4ff6b23bf45017d1de417db63533439b"
+SEGREDO = os.environ.get("SEGREDO")
 
 
 class Token(str):

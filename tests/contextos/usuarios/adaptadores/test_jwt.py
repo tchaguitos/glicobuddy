@@ -6,7 +6,7 @@ from datetime import datetime, date, timedelta
 from libs.tipos_basicos.texto import Email, Senha, Nome
 
 from contextos.usuarios.dominio.agregados import Usuario
-from contextos.usuarios.adaptadores.jwt import GeradorDeToken
+from contextos.usuarios.adaptadores.jwt import GeradorDeToken, TokenExpirado
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -42,6 +42,6 @@ def test_token_expirado():
     with freeze_time(datetime.now() - timedelta(days=3)):
         token = GeradorDeToken.gerar_token(usuario=usuario)
 
-    with pytest.raises(GeradorDeToken.TokenExpirado) as e:
+    with pytest.raises(TokenExpirado) as e:
         GeradorDeToken.verificar_token(token=token)
         assert str(e.value) == "O token utilizado expirou. Faça login novamente"

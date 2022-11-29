@@ -37,14 +37,14 @@ class EncriptadorDeSenha(Encriptador):
         )
         return senha_valida
 
-    def _encriptar(self, texto: str) -> bytes:
+    def _encriptar(self, texto: str) -> str:
         return self.contexto.hash(texto)
 
     def _verificar(
         self,
         texto_para_verificar: str,
         texto_encriptado: str,
-    ):
+    ) -> bool:
         return self.contexto.verify(
             texto_para_verificar,
             texto_encriptado,

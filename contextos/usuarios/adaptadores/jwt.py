@@ -16,14 +16,15 @@ class Token(str):
         return super().__new__(cls, token)
 
 
+class TokenExpirado(Exception):
+    pass
+
+
 class GeradorDeToken:
     """"""
 
-    class TokenExpirado(ExpiredSignatureError):
-        pass
-
     @classmethod
-    def gerar_token(self, usuario: Usuario) -> Token:
+    def gerar_token(cls, usuario: Usuario) -> Token:
         data_de_expiracao = datetime.utcnow() + timedelta(minutes=MINUTOS_ATE_EXPIRAR)
 
         dados_do_usuario = {
@@ -37,9 +38,9 @@ class GeradorDeToken:
         return Token(jwt.encode(dados_do_usuario, SEGREDO, algorithm=ALGORITMO))
 
     @classmethod
-    def verificar_token(self, token: Token) -> Dict[str, Any]:
+    def verificar_token(cls, token: Token) -> Dict[str, Any]:
         try:
             return jwt.decode(token, SEGREDO, algorithms=[ALGORITMO])
 
         except ExpiredSignatureError:
-            raise self.TokenExpirado("O token utilizado expirou. Faça login novamente")
+            raise TokenExpirado("O token utilizado expirou. Faça login novamente")

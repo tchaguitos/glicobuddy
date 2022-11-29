@@ -104,17 +104,19 @@ def atualizar_usuario(
     novos_valores: SerializadorParaEdicaoDeUsuario,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = UnidadeDeTrabalho()
+    usuario_id = usuario_logado.id
+
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     usuario_editado = bus.tratar_mensagem(
         mensagem=EditarUsuario(
-            usuario_id=IdUsuario(usuario_logado.id),
+            usuario_id=IdUsuario(usuario_id),
             novos_valores=ValoresParaEdicaoDeUsuario(
                 nome_completo=Nome(novos_valores.nome_completo),
                 data_de_nascimento=novos_valores.data_de_nascimento,
             ),
-            editado_por=IdUsuario(usuario_logado.id),
+            editado_por=IdUsuario(usuario_id),
         ),
     )
 
@@ -130,13 +132,15 @@ def atualizar_email_do_usuario(
     novos_valores: SerializadorParaAlteracaoDeEmail,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = UnidadeDeTrabalho()
+    usuario_id = usuario_logado.id
+
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     try:
         usuario_com_email_alterado = bus.tratar_mensagem(
             mensagem=AlterarEmailDoUsuario(
-                usuario_id=IdUsuario(usuario_logado.id),
+                usuario_id=IdUsuario(usuario_id),
                 novo_email=Email(novos_valores.novo_email),
             ),
         )
@@ -156,7 +160,8 @@ def atualizar_email_do_usuario(
     response_model=SerializadorDeUsuario,
 )
 def consultar_usuarios_por_id(usuario_id: IdUsuario):
-    uow = UnidadeDeTrabalho()
+    # TODO: criar funcao pra bloquear endpoints por tipo de usuario
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
 
     usuario = consultar_usuario_por_id(
         uow=uow,

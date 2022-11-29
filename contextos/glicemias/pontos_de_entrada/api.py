@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from fastapi import APIRouter, HTTPException, Depends
 
 from libs.unidade_de_trabalho import UnidadeDeTrabalho
@@ -44,12 +42,10 @@ router = APIRouter(
 def listar_glicemias(
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    usuario_id = usuario_logado.id
 
-    uow = UnidadeDeTrabalho()
+    uow = UnidadeDeTrabalho(usuario=usuario_logado.id)
 
     glicemias = consultar_glicemias(
-        usuario_id=usuario_id,
         uow=uow,
     )
 
@@ -76,13 +72,10 @@ def consultar_glicemias_por_id(
     glicemia_id: IdGlicemia,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    usuario_id = usuario_logado.id
-
-    uow = UnidadeDeTrabalho()
+    uow = UnidadeDeTrabalho(usuario=usuario_logado.id)
 
     glicemia = consultar_glicemia_por_id(
         glicemia_id=glicemia_id,
-        usuario_id=usuario_id,
         uow=uow,
     )
 
@@ -115,7 +108,7 @@ def cadastrar_glicemia(
 ):
     usuario_id = usuario_logado.id
 
-    uow = UnidadeDeTrabalho()
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -125,7 +118,6 @@ def cadastrar_glicemia(
                 observacoes=nova_glicemia.observacoes,
                 primeira_do_dia=nova_glicemia.primeira_do_dia,
                 horario_dosagem=nova_glicemia.horario_dosagem,
-                criado_por=IdUsuario(usuario_id),
             ),
         )
 
@@ -147,7 +139,7 @@ def atualizar_glicemia(
 ):
     usuario_id = usuario_logado.id
 
-    uow = UnidadeDeTrabalho()
+    uow = UnidadeDeTrabalho(usuario=usuario_id)
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -160,7 +152,6 @@ def atualizar_glicemia(
                     primeira_do_dia=novos_valores.primeira_do_dia,
                     horario_dosagem=novos_valores.horario_dosagem,
                 ),
-                editado_por=IdUsuario(usuario_id),
             ),
         )
 
@@ -179,7 +170,7 @@ def deletar_glicemia(
     glicemia_id: IdGlicemia,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = UnidadeDeTrabalho()
+    uow = UnidadeDeTrabalho(usuario=usuario_logado.id)
     bus = barramento.bootstrap(uow=uow)
 
     id_glicemia_removida = bus.tratar_mensagem(

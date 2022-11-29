@@ -50,13 +50,16 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
 
 
 class FakeUOW(UnidadeDeTrabalhoAbstrata):
-    def __init__(self):
+    usuario: Optional[IdUsuario] = None
+
+    def __init__(self, usuario: Optional[IdUsuario] = None):
         repo = FakeRepo(set())
 
         self.repo_dominio = repo
         self.repo_consulta = repo
 
         self.committed = False
+        self.usuario = usuario
 
     def commit(self):
         self.committed = True
@@ -67,9 +70,8 @@ class FakeUOW(UnidadeDeTrabalhoAbstrata):
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_criar_glicemia():
-    uow = FakeUOW()
+    uow = FakeUOW(usuario=IdUsuario())
 
-    id_usuario = uuid4()
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
 
     registros_no_banco = list(uow.repo_consulta.consultar_todos())
@@ -82,7 +84,6 @@ def test_criar_glicemia():
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
             primeira_do_dia=True,
-            criado_por=IdUsuario(id_usuario),
         ),
         uow=uow,
     )
@@ -99,15 +100,13 @@ def test_criar_glicemia():
     assert glicemia_criada.primeira_do_dia is True
     assert glicemia_criada.horario_dosagem == horario_dosagem
     assert glicemia_criada.observacoes == "glicose em jejum"
-    assert glicemia_criada.auditoria.criado_por == id_usuario
+    assert glicemia_criada.auditoria.criado_por == uow.usuario
     assert glicemia_criada.auditoria.data_criacao == datetime.now()
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_editar_glicemia():
-    uow = FakeUOW()
-
-    id_usuario = uuid4()
+    uow = FakeUOW(usuario=IdUsuario())
 
     horario_dosagem = datetime(2021, 8, 27, 10, 15)
     horario_edicao = datetime(2021, 8, 27, 16, 21)
@@ -118,7 +117,6 @@ def test_editar_glicemia():
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
             primeira_do_dia=True,
-            criado_por=IdUsuario(id_usuario),
         ),
         uow=uow,
     )
@@ -145,7 +143,6 @@ def test_editar_glicemia():
                     horario_dosagem=horario_dosagem,
                     observacoes="teste mano afff",
                 ),
-                editado_por=IdUsuario(id_usuario),
             ),
             uow=uow,
         )
@@ -153,7 +150,7 @@ def test_editar_glicemia():
     assert glicemia_editada.valor == 98
     assert glicemia_editada.observacoes == "teste mano afff"
 
-    assert glicemia_editada.auditoria.ultima_vez_editado_por == id_usuario
+    assert glicemia_editada.auditoria.ultima_vez_editado_por == uow.usuario
     assert glicemia_editada.auditoria.data_ultima_edicao == horario_edicao
 
     registros_no_banco = list(uow.repo_consulta.consultar_todos())
@@ -163,7 +160,7 @@ def test_editar_glicemia():
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_remover_glicemia():
-    uow = FakeUOW()
+    uow = FakeUOW(usuario=IdUsuario())
 
     registros_no_banco = list(uow.repo_consulta.consultar_todos())
 
@@ -175,7 +172,6 @@ def test_remover_glicemia():
             horario_dosagem=datetime(2021, 8, 27, 10, 15),
             observacoes="glicose em jejum",
             primeira_do_dia=False,
-            criado_por=IdUsuario(uuid4()),
         ),
         uow=uow,
     )

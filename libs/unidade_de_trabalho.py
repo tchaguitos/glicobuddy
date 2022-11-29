@@ -8,7 +8,7 @@ from sqlalchemy.orm.session import Session
 from libs.dominio import Dominio
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
-from contextos.usuarios.dominio.agregados import Usuario
+from libs.tipos_basicos.identificadores_db import IdUsuario
 
 
 class UnidadeDeTrabalhoUtilizadaSemDominio(Exception):
@@ -21,10 +21,7 @@ class UnidadeDeTrabalhoAbstrata(abc.ABC):
     repo_consulta: RepositorioConsulta
     classe_repo_dominio: Type[RepositorioDominio]
     classe_repo_consulta: Type[RepositorioConsulta]
-    usuario: Optional[Usuario]
-
-    def __init__(self, usuario: Optional[Usuario] = None):
-        self.usuario = usuario
+    usuario: Optional[IdUsuario]
 
     def __enter__(self):
         return self
@@ -67,8 +64,13 @@ class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata):
     repo_dominio: RepositorioDominio
     repo_consulta: RepositorioConsulta
 
-    def __init__(self, session_factory=get_session_factory):
+    def __init__(
+        self,
+        session_factory=get_session_factory,
+        usuario: Optional[IdUsuario] = None,
+    ):
         self.session_factory = session_factory
+        self.usuario = usuario
 
     def __enter__(self):
         if not hasattr(self, "classe_repo_dominio"):

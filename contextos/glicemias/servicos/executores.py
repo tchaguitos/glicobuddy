@@ -18,7 +18,7 @@ def criar_glicemia(comando: CriarGlicemia, uow: UnidadeDeTrabalhoAbstrata) -> Gl
             horario_dosagem=comando.horario_dosagem,
             observacoes=comando.observacoes,
             primeira_do_dia=comando.primeira_do_dia,
-            criado_por=comando.criado_por,
+            criado_por=uow.usuario,
         )
 
         uow.repo_dominio.adicionar(nova_glicemia)
@@ -34,7 +34,7 @@ def editar_glicemia(
         glicemia: Glicemia = uow.repo_consulta.consultar_por_id(id=comando.glicemia_id)
 
         glicemia_editada = glicemia.editar(
-            editado_por=comando.editado_por,
+            editado_por=uow.usuario,
             novos_valores=comando.novos_valores,
         )
 

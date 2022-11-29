@@ -25,7 +25,12 @@ def get_session_factory(engine=None, is_test: bool = False):
         metadata.drop_all(engine)
         metadata.create_all(engine)
 
-    return sessionmaker(bind=engine, expire_on_commit=False)()
+    return sessionmaker(
+        bind=engine,
+        autoflush=False,
+        autocommit=False,
+        expire_on_commit=False,
+    )()
 
 
 def get_postgres_uri():

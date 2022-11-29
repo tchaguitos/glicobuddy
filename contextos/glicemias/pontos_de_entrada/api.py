@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 from libs.pontos_de_entrada import retornar_usuario_logado
 
@@ -46,7 +46,7 @@ def listar_glicemias(
 ):
     usuario_id = usuario_logado.id
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
 
     glicemias = consultar_glicemias(
         usuario_id=usuario_id,
@@ -78,7 +78,7 @@ def consultar_glicemias_por_id(
 ):
     usuario_id = usuario_logado.id
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
 
     glicemia = consultar_glicemia_por_id(
         glicemia_id=glicemia_id,
@@ -115,7 +115,7 @@ def cadastrar_glicemia(
 ):
     usuario_id = usuario_logado.id
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -147,7 +147,7 @@ def atualizar_glicemia(
 ):
     usuario_id = usuario_logado.id
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -179,7 +179,7 @@ def deletar_glicemia(
     glicemia_id: IdGlicemia,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     id_glicemia_removida = bus.tratar_mensagem(

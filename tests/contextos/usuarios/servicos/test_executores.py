@@ -4,7 +4,7 @@ from typing import Set, Optional
 from freezegun import freeze_time
 from datetime import datetime, date
 
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
 from libs.tipos_basicos.texto import Email, Senha, Nome
@@ -60,7 +60,7 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
         )
 
 
-class FakeUOW(AbstractUnitOfWork):
+class FakeUOW(UnidadeDeTrabalhoAbstrata):
     def __init__(self):
         repo = FakeRepo(set())
 

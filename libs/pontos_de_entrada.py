@@ -3,7 +3,7 @@ from jose import JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalho
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
 from contextos.usuarios.adaptadores.jwt import GeradorDeToken
@@ -31,7 +31,7 @@ def retornar_usuario_logado(token: str = Depends(oauth2_scheme)):
 
     usuario_logado = consultar_usuario_por_id(
         usuario_id=IdUsuario(usuario_id),
-        uow=SqlAlchemyUnitOfWork(),
+        uow=UnidadeDeTrabalho(),
     )
 
     if usuario_logado is None:

@@ -2,14 +2,14 @@ from uuid import UUID
 from typing import Iterator
 
 from libs.dominio import Dominio
-from libs.unidade_de_trabalho import AbstractUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
 from contextos.glicemias.dominio.entidades import Glicemia
 
 
 def consultar_glicemias(
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
     usuario_id: IdUsuario,
 ) -> Iterator[Glicemia]:
 
@@ -21,7 +21,7 @@ def consultar_glicemias(
 
 
 def consultar_glicemia_por_id(
-    uow: AbstractUnitOfWork,
+    uow: UnidadeDeTrabalhoAbstrata,
     usuario_id: IdUsuario,
     glicemia_id: IdGlicemia,
 ) -> Glicemia:

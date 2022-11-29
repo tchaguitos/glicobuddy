@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from libs.unidade_de_trabalho import SqlAlchemyUnitOfWork
+from libs.unidade_de_trabalho import UnidadeDeTrabalho
 
 from libs.tipos_basicos.texto import Nome, Email, Senha
 from libs.tipos_basicos.identificadores_db import IdUsuario
@@ -44,7 +44,7 @@ def login(
     dados_para_login: SerializadorParaAutenticarUsuario,
 ):
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -73,7 +73,7 @@ def cadastrar_usuario(
     novo_usuario: SerializadorParaCriacaoDeUsuario,
 ):
 
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -104,7 +104,7 @@ def atualizar_usuario(
     novos_valores: SerializadorParaEdicaoDeUsuario,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     usuario_editado = bus.tratar_mensagem(
@@ -130,7 +130,7 @@ def atualizar_email_do_usuario(
     novos_valores: SerializadorParaAlteracaoDeEmail,
     usuario_logado: SerializadorDeUsuario = Depends(retornar_usuario_logado),
 ):
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
     bus = barramento.bootstrap(uow=uow)
 
     try:
@@ -156,7 +156,7 @@ def atualizar_email_do_usuario(
     response_model=SerializadorDeUsuario,
 )
 def consultar_usuarios_por_id(usuario_id: IdUsuario):
-    uow = SqlAlchemyUnitOfWork()
+    uow = UnidadeDeTrabalho()
 
     usuario = consultar_usuario_por_id(
         uow=uow,

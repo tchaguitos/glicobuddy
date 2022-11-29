@@ -1,6 +1,6 @@
 import abc
 
-from typing import Type, List
+from typing import Type, List, Optional
 
 from config import get_session_factory
 from sqlalchemy.orm.session import Session
@@ -8,17 +8,23 @@ from sqlalchemy.orm.session import Session
 from libs.dominio import Dominio
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 
+from contextos.usuarios.dominio.agregados import Usuario
+
 
 class UnidadeDeTrabalhoUtilizadaSemDominio(Exception):
     pass
 
 
-class AbstractUnitOfWork(abc.ABC):
+class UnidadeDeTrabalhoAbstrata(abc.ABC):
     committed: bool
     repo_dominio: RepositorioDominio
     repo_consulta: RepositorioConsulta
     classe_repo_dominio: Type[RepositorioDominio]
     classe_repo_consulta: Type[RepositorioConsulta]
+    usuario: Optional[Usuario]
+
+    def __init__(self, usuario: Optional[Usuario] = None):
+        self.usuario = usuario
 
     def __enter__(self):
         return self
@@ -57,8 +63,7 @@ class AbstractUnitOfWork(abc.ABC):
         raise NotImplementedError
 
 
-# TODO: mudar apenas para `unidade de trabalho`
-class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
+class UnidadeDeTrabalho(UnidadeDeTrabalhoAbstrata):
     repo_dominio: RepositorioDominio
     repo_consulta: RepositorioConsulta
 

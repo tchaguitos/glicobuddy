@@ -3,11 +3,11 @@ services:
   db:
     image : postgres
     environment:
-      POSTGRES_DB: glicotest
-      POSTGRES_USER: glico
-      POSTGRES_PASSWORD: test
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ${POSTGRES_VOLUME_URL}
     ports:
       - 5432:5432
-    container_name: glicotest
+    container_name: ${DB_NAME}

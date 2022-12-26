@@ -3,6 +3,10 @@ on:
     branches: [ main ]
 
 env:
+  DB_USER: glico
+  DB_PASSWORD: test
+  DB_HOST: localhost
+  DB_NAME: glicotest
   SEGREDO: TOPS3CRET
   POSTGRES_VOLUME_URL: /tmp/postgresql/data
 

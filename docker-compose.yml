@@ -3,6 +3,18 @@ services:
   db:
     image : postgres
     environment:
+      POSTGRES_DB: glicobuddy
+      POSTGRES_USER: glico
+      POSTGRES_PASSWORD: test
+    volumes:
+      - ${POSTGRES_VOLUME_URL}
+    ports:
+      - 5432:5432
+    container_name: glicobuddy
+
+  test-db:
+    image : postgres
+    environment:
       POSTGRES_DB: glicotest
       POSTGRES_USER: glico
       POSTGRES_PASSWORD: test

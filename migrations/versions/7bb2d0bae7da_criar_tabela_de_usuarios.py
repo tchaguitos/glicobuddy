@@ -8,7 +8,7 @@ Create Date: 2022-12-26 18:58:22.889879
 from alembic import op
 import sqlalchemy as sa
 
-from sqlalchemy.dialects.postgresql import UUID, DATE
+from sqlalchemy.dialects.postgresql import UUID
 
 revision = "7bb2d0bae7da"
 down_revision = None

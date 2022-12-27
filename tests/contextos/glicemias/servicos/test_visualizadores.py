@@ -38,6 +38,13 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
     def consultar_todos(self):
         yield from self.__glicemias
 
+    def consultar_por_usuario(self, id_usuario: IdUsuario):
+        return [
+            glicemia
+            for glicemia in self.__glicemias
+            if glicemia.auditoria.criado_por == id_usuario
+        ]
+
     def consultar_por_id(self, id: UUID):
         return next(
             (glicemia for glicemia in self.__glicemias if glicemia.id == id), None
@@ -65,8 +72,8 @@ class FakeUOW(UnidadeDeTrabalhoAbstrata):
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_consultar_glicemias():
-    uow = FakeUOW(usuario=IdUsuario())
-    usuario_id = uuid4()
+    usuario_id = IdUsuario(uuid4())
+    uow = FakeUOW(usuario=usuario_id)
 
     horario_dosagem_1 = datetime(2021, 8, 27, 10, 15)
     horario_dosagem_2 = horario_dosagem_1 + timedelta(hours=2)
@@ -79,7 +86,7 @@ def test_consultar_glicemias():
             horario_dosagem=horario_dosagem_1,
             observacoes="glicose em jejum",
             auditoria=Auditoria(
-                criado_por=IdUsuario(usuario_id),
+                criado_por=usuario_id,
                 data_criacao=datetime.now(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -93,7 +100,7 @@ def test_consultar_glicemias():
             horario_dosagem=horario_dosagem_2,
             observacoes="depois do café da manhã",
             auditoria=Auditoria(
-                criado_por=IdUsuario(usuario_id),
+                criado_por=usuario_id,
                 data_criacao=datetime.now() + timedelta(hours=2),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
@@ -119,7 +126,7 @@ def test_consultar_glicemias():
         horario_dosagem=horario_dosagem_3,
         observacoes="pré almoço",
         auditoria=Auditoria(
-            criado_por=IdUsuario(usuario_id),
+            criado_por=usuario_id,
             data_criacao=datetime.now() + timedelta(hours=4),
             ultima_vez_editado_por=None,
             data_ultima_edicao=None,
@@ -132,8 +139,26 @@ def test_consultar_glicemias():
     glicemias = list(consultar_glicemias(uow=uow))
 
     assert len(glicemias) == 3
-
     assert nova_glicemia in glicemias
+
+    glicemia_de_outro_usuario = Glicemia(
+        valor=115,
+        primeira_do_dia=False,
+        horario_dosagem=horario_dosagem_3,
+        observacoes="pré almoço",
+        auditoria=Auditoria(
+            criado_por=IdUsuario(uuid4()),  # outro usuario. nao deve ser retornada
+            data_criacao=datetime.now() + timedelta(hours=4),
+            ultima_vez_editado_por=None,
+            data_ultima_edicao=None,
+            ativo=True,
+            deletado=False,
+        ),
+    )
+    uow.repo_dominio.adicionar(glicemia_de_outro_usuario)
+
+    assert len(glicemias) == 3
+    assert glicemia_de_outro_usuario not in glicemias
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))

@@ -3,9 +3,10 @@ from typing import Iterator
 
 from libs.dominio import Dominio
 from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
-from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
+from libs.tipos_basicos.identificadores_db import IdGlicemia
 
 from contextos.glicemias.dominio.entidades import Glicemia
+from contextos.glicemias.repositorio.repo_consulta import RepoConsultaGlicemias
 
 
 def consultar_glicemias(
@@ -13,10 +14,12 @@ def consultar_glicemias(
 ) -> Iterator[Glicemia]:
 
     with uow(Dominio.glicemias):
-        print(uow.usuario)  # TODO: vincular glicemias a usuarios ou outra entidade
-        glicemias = uow.repo_consulta.consultar_todos()
+        repo_consulta: RepoConsultaGlicemias = uow.repo_consulta
+        glicemias_do_usuario = repo_consulta.consultar_por_usuario(
+            id_usuario=uow.usuario
+        )
 
-    return glicemias
+    return glicemias_do_usuario
 
 
 def consultar_glicemia_por_id(
@@ -25,7 +28,6 @@ def consultar_glicemia_por_id(
 ) -> Glicemia:
 
     with uow(Dominio.glicemias):
-        print(uow.usuario)  # TODO: vincular glicemias a usuarios ou outra entidade
         glicemia = uow.repo_consulta.consultar_por_id(id=glicemia_id)
 
     return glicemia

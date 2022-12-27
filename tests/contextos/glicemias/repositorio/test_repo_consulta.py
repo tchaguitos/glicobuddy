@@ -78,3 +78,49 @@ def test_repositorio_consultar_glicemia_por_id(session):
     glicemia_salva_no_banco = repo_consulta.consultar_por_id(id=glicemia_criada.id)
 
     assert glicemia_criada == glicemia_salva_no_banco
+
+
+@freeze_time(datetime(2021, 8, 27, 16, 20))
+def test_repositorio_consultar_glicemia_por_usuario(session, usuario_salvo):
+    usuario = usuario_salvo
+
+    repo_dominio = RepoDominioGlicemias(session)
+    repo_consulta = RepoConsultaGlicemias(session)
+
+    glicemia_1 = Glicemia.criar(
+        valor=120,
+        primeira_do_dia=True,
+        horario_dosagem=datetime(2021, 8, 27, 8, 15),
+        observacoes="primeira glicemia do dia",
+        criado_por=usuario.id,
+    )
+
+    glicemia_2 = Glicemia.criar(
+        valor=98,
+        primeira_do_dia=False,
+        horario_dosagem=datetime(2021, 8, 27, 8, 15),
+        observacoes="antes do almoço",
+        criado_por=usuario.id,
+    )
+
+    glicemia_3 = Glicemia.criar(
+        valor=120,
+        primeira_do_dia=True,
+        horario_dosagem=datetime(2021, 8, 27, 8, 15),
+        observacoes="glicemia",
+        criado_por=IdUsuario(uuid4()),
+    )
+
+    repo_dominio.adicionar(glicemia_1)
+    repo_dominio.adicionar(glicemia_2)
+    repo_dominio.adicionar(glicemia_3)
+
+    session.commit()
+
+    glicemias_do_usuario = list(
+        repo_consulta.consultar_por_usuario(id_usuario=usuario.id)
+    )
+
+    assert glicemias_do_usuario
+    assert len(glicemias_do_usuario) == 2
+    assert glicemia_3 not in glicemias_do_usuario

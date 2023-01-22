@@ -15,9 +15,9 @@ def criar_glicemia(comando: CriarGlicemia, uow: UnidadeDeTrabalhoAbstrata) -> Gl
     with uow(Dominio.glicemias):
         nova_glicemia = Glicemia.criar(
             valor=comando.valor,
+            tipo=comando.tipo,
             horario_dosagem=comando.horario_dosagem,
             observacoes=comando.observacoes,
-            primeira_do_dia=comando.primeira_do_dia,
             criado_por=uow.usuario,
         )
 

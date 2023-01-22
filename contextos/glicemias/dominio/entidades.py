@@ -4,9 +4,10 @@ from datetime import datetime
 from dataclass_type_validator import dataclass_validate
 from dataclasses import dataclass, asdict, replace, field
 
+from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
-from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import TipoDeGlicemia, ValoresParaEdicaoDeGlicemia
 
 
 @dataclass_validate
@@ -16,8 +17,6 @@ class Auditoria:
     data_criacao: datetime
     ultima_vez_editado_por: Optional[IdUsuario]
     data_ultima_edicao: Optional[datetime]
-    ativo: bool = True
-    deletado: bool = False
 
     def __post_init__(self):
         self.criado_por = IdUsuario(self.criado_por)
@@ -31,20 +30,18 @@ class Auditoria:
             self.data_criacao,
             self.ultima_vez_editado_por,
             self.data_ultima_edicao,
-            self.ativo,
-            self.deletado,
         )
 
 
 @dataclass_validate
 @dataclass
 class Glicemia:
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
-    horario_dosagem: datetime
+    tipo: TipoDeGlicemia
     auditoria: Auditoria
+    valor: ValorDeGlicemia
+    horario_dosagem: datetime
     id: IdGlicemia = field(init=False, default_factory=IdGlicemia)
+    observacoes: Optional[str] = None
 
     class ValorDeGlicemiaInvalido(Exception):
         pass
@@ -52,34 +49,26 @@ class Glicemia:
     def __hash__(self):
         return hash(self.id)
 
-    def __post_init__(self):
-        if not self.valor > 20:
-            raise Glicemia.ValorDeGlicemiaInvalido(
-                "O valor da glicemia deve ser superior a 20mg/dl"
-            )
-
     @classmethod
     def criar(
         cls,
-        valor: int,
+        tipo: TipoDeGlicemia,
+        valor: ValorDeGlicemia,
         horario_dosagem: datetime,
-        observacoes: str,
-        primeira_do_dia: bool,
         criado_por: IdUsuario,
+        observacoes: Optional[str],
     ):
         """"""
         return cls(
+            tipo=tipo,
             valor=valor,
             horario_dosagem=horario_dosagem,
             observacoes=observacoes,
-            primeira_do_dia=primeira_do_dia,
             auditoria=Auditoria(
                 criado_por=criado_por,
-                data_criacao=datetime.now(),
+                data_criacao=datetime.utcnow(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         )
 
@@ -96,7 +85,7 @@ class Glicemia:
         return objeto_editado
 
     def __atualizar_valores_auditoria(self, editado_por: IdUsuario):
-        self.auditoria.data_ultima_edicao = datetime.now()
+        self.auditoria.data_ultima_edicao = datetime.utcnow()
         self.auditoria.ultima_vez_editado_por = editado_por
 
         return self.auditoria
@@ -110,9 +99,9 @@ class Glicemia:
 
         glicemia_atualizada = replace(self, **asdict(novos_valores))
 
+        self.tipo = glicemia_atualizada.tipo
         self.valor = glicemia_atualizada.valor
         self.observacoes = glicemia_atualizada.observacoes
-        self.primeira_do_dia = glicemia_atualizada.primeira_do_dia
         self.horario_dosagem = glicemia_atualizada.horario_dosagem
 
         self.__atualizar_valores_auditoria(editado_por=editado_por)

@@ -11,6 +11,7 @@ from contextos.usuarios.dominio.comandos import (
     AutenticarUsuario,
     AlterarEmailDoUsuario,
 )
+from contextos.usuarios.repositorio.repo_consulta import RepoConsultaUsuarios
 
 from contextos.usuarios.dominio.eventos import EmailAlterado
 from contextos.usuarios.adaptadores.jwt import GeradorDeToken, Token
@@ -23,8 +24,14 @@ def criar_usuario(
     uow: UnidadeDeTrabalhoAbstrata,
     encriptar_senha: Optional[bool] = True,
 ) -> Usuario:
-    with uow(Dominio.usuarios):
-        ja_existe_usuario_com_o_email = uow.repo_consulta.consultar_por_email(
+    """"""
+
+    uow = uow(Dominio.usuarios)
+
+    with uow:
+        repo_consulta: RepoConsultaUsuarios = uow.repo_consulta
+
+        ja_existe_usuario_com_o_email = repo_consulta.consultar_por_email(
             email=Email(comando.email)
         )
 
@@ -52,8 +59,13 @@ def criar_usuario(
 
 
 def editar_usuario(comando: EditarUsuario, uow: UnidadeDeTrabalhoAbstrata) -> Usuario:
-    with uow(Dominio.usuarios):
-        usuario: Usuario = uow.repo_consulta.consultar_por_id(
+    """"""
+
+    uow = uow(Dominio.usuarios)
+
+    with uow:
+        repo_consulta: RepoConsultaUsuarios = uow.repo_consulta
+        usuario: Usuario = repo_consulta.consultar_por_id(
             id_usuario=comando.usuario_id
         )
 
@@ -68,8 +80,12 @@ def editar_usuario(comando: EditarUsuario, uow: UnidadeDeTrabalhoAbstrata) -> Us
 def autenticar_usuario(
     comando: AutenticarUsuario, uow: UnidadeDeTrabalhoAbstrata
 ) -> Token:
-    with uow(Dominio.usuarios):
-        usuario: Usuario = uow.repo_consulta.consultar_por_email(email=comando.email)
+
+    uow = uow(Dominio.usuarios)
+
+    with uow:
+        repo_consulta: RepoConsultaUsuarios = uow.repo_consulta
+        usuario: Usuario = repo_consulta.consultar_por_email(email=comando.email)
 
         if not usuario:
             raise UsuarioNaoEncontrado("Usuário não encontrado")

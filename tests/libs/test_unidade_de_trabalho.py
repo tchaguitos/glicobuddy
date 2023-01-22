@@ -28,6 +28,17 @@ class FakeUOW(UnidadeDeTrabalhoAbstrata):
         pass
 
 
+class FakeSQLSession:
+    def commit(*args, **kwargs):
+        pass
+
+    def close(*args, **kwargs):
+        pass
+
+    def rollback(*args, **kwargs):
+        pass
+
+
 class FakeSQLUOW(UnidadeDeTrabalho):
     committed: bool = False
     repo_dominio: RepositorioDominio = None
@@ -71,7 +82,7 @@ def test_unidade_de_trabalho_abstrata():
 
 
 def test_unidade_de_trabalho_abstrata_sql():
-    uow = FakeSQLUOW()
+    uow = FakeSQLUOW(session_factory=FakeSQLSession)
 
     assert uow.committed is False
 

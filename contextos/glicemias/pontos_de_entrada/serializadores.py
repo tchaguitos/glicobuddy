@@ -1,26 +1,27 @@
-from typing import List
-from uuid import UUID
 from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel, Extra
+from contextos.glicemias.dominio.objetos_de_valor import TipoDeGlicemia
 
+from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.tipos_basicos.identificadores_db import IdGlicemia
 
 
 class SerializadorParaCriacaoDeGlicemia(BaseModel):
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
+    tipo: TipoDeGlicemia
+    valor: ValorDeGlicemia
     horario_dosagem: datetime
+    observacoes: Optional[str] = None
 
     class Config:
         extra = Extra.forbid
 
 
 class SerializadorParaEdicaoDeGlicemia(BaseModel):
-    valor: int
-    observacoes: str
-    primeira_do_dia: bool
+    tipo: TipoDeGlicemia
+    valor: ValorDeGlicemia
     horario_dosagem: datetime
+    observacoes: Optional[str] = None
 
     class Config:
         extra = Extra.forbid
@@ -32,9 +33,9 @@ class RetornoDaAPIDeGlicemias(BaseModel):
 
 class SerializadorDeGlicemia(BaseModel):
     id: IdGlicemia
-    valor: int
     observacoes: str
-    primeira_do_dia: bool
+    tipo: TipoDeGlicemia
+    valor: ValorDeGlicemia
     horario_dosagem: datetime
 
 

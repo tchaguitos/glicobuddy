@@ -5,7 +5,7 @@ class ValorDeGlicemiaInvalido(Exception):
 class ValorDeGlicemia(int):
     """"""
 
-    def __new__(cls, valor: str):
+    def __new__(cls, valor: int):
         if not isinstance(valor, int):
             raise ValorDeGlicemiaInvalido(
                 "Você deve fornecer um valor de glicemia válido"

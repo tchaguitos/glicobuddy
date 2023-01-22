@@ -5,12 +5,16 @@ from datetime import datetime
 from freezegun import freeze_time
 
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
+from libs.tipos_basicos.numeros import ValorDeGlicemia, ValorDeGlicemiaInvalido
 
 from contextos.glicemias.dominio.entidades import (
     Glicemia,
     Auditoria,
 )
-from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import (
+    TipoDeGlicemia,
+    ValoresParaEdicaoDeGlicemia,
+)
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -21,8 +25,8 @@ def test_criar_glicemia():
     hora_glicemia = datetime(2021, 8, 27, 8, 15)
 
     glicemia_esperada = Glicemia(
-        valor=120,
-        primeira_do_dia=True,
+        valor=ValorDeGlicemia(120),
+        tipo=TipoDeGlicemia("jejum"),
         horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
         auditoria=Auditoria(
@@ -30,14 +34,12 @@ def test_criar_glicemia():
             data_criacao=hora_atual,
             ultima_vez_editado_por=None,
             data_ultima_edicao=None,
-            ativo=True,
-            deletado=False,
         ),
     )
 
     glicemia_criada = Glicemia.criar(
-        valor=120,
-        primeira_do_dia=True,
+        valor=ValorDeGlicemia(120),
+        tipo=TipoDeGlicemia("jejum"),
         horario_dosagem=hora_glicemia,
         observacoes="primeira glicemia do dia",
         criado_por=IdUsuario(id_usuario),
@@ -45,7 +47,7 @@ def test_criar_glicemia():
 
     assert glicemia_criada.id
     assert glicemia_criada.valor == glicemia_esperada.valor
-    assert glicemia_criada.primeira_do_dia == glicemia_esperada.primeira_do_dia
+    assert glicemia_criada.tipo == glicemia_esperada.tipo
     assert glicemia_criada.horario_dosagem == glicemia_esperada.horario_dosagem
     assert glicemia_criada.observacoes == glicemia_esperada.observacoes
     assert (
@@ -61,10 +63,10 @@ def test_criar_glicemia():
 def test_criar_glicemia_com_valores_invalidos():
     id_usuario = uuid4()
 
-    with pytest.raises(Glicemia.ValorDeGlicemiaInvalido) as e:
+    with pytest.raises(ValorDeGlicemiaInvalido) as e:
         Glicemia.criar(
-            valor=10,
-            primeira_do_dia=True,
+            valor=ValorDeGlicemia(10),
+            tipo=TipoDeGlicemia.jejum,
             horario_dosagem=datetime.now(),
             observacoes="primeira glicemia do dia",
             criado_por=IdUsuario(id_usuario),
@@ -77,14 +79,13 @@ def test_criar_glicemia_com_valores_invalidos():
 def test_editar_glicemia():
     id_usuario = uuid4()
 
-    horario_criacao = datetime(2021, 8, 27, 16, 20)
     horario_edicao = datetime(2021, 8, 27, 16, 21)
 
     horario_dosagem = datetime(2021, 8, 27, 8, 15)
 
     glicemia_criada = Glicemia.criar(
-        valor=120,
-        primeira_do_dia=True,
+        valor=ValorDeGlicemia(120),
+        tipo=TipoDeGlicemia.jejum,
         horario_dosagem=horario_dosagem,
         observacoes="primeira glicemia do dia",
         criado_por=IdUsuario(id_usuario),
@@ -100,8 +101,8 @@ def test_editar_glicemia():
     with freeze_time(horario_edicao):
         glicemia_editada = glicemia_criada.editar(
             novos_valores=ValoresParaEdicaoDeGlicemia(
-                valor=88,
-                primeira_do_dia=True,
+                valor=ValorDeGlicemia(88),
+                tipo=TipoDeGlicemia.jejum,
                 horario_dosagem=horario_dosagem,
                 observacoes="glicose em jejum",
             ),
@@ -125,18 +126,18 @@ def test_editar_glicemia_com_valores_invalidos():
     horario_dosagem = datetime(2021, 8, 27, 8, 15)
 
     glicemia_criada = Glicemia.criar(
-        valor=120,
-        primeira_do_dia=True,
+        valor=ValorDeGlicemia(120),
+        tipo=TipoDeGlicemia.pos_prandial,
         horario_dosagem=horario_dosagem,
         observacoes="primeira glicemia do dia",
         criado_por=IdUsuario(id_usuario),
     )
 
-    with pytest.raises(Glicemia.ValorDeGlicemiaInvalido) as e:
+    with pytest.raises(ValorDeGlicemiaInvalido) as e:
         glicemia_criada.editar(
             novos_valores=ValoresParaEdicaoDeGlicemia(
-                valor=13,
-                primeira_do_dia=True,
+                valor=ValorDeGlicemia(13),
+                tipo=TipoDeGlicemia.pos_prandial,
                 horario_dosagem=horario_dosagem,
                 observacoes="glicose em jejum",
             ),

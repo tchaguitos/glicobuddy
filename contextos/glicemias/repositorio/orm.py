@@ -23,7 +23,7 @@ glicemia = Table(
     Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
     Column("valor", Integer),
     Column("observacoes", String(255)),
-    Column("tipo", ENUM(TipoDeGlicemia, schema="public")),
+    Column("tipo", ENUM(TipoDeGlicemia, schema="public", name="tipo_de_glicemia")),
     Column("horario_dosagem", DateTime),
     Column("criado_por", ForeignKey(usuario.c.id, ondelete="CASCADE")),
     Column("data_criacao", DateTime, default=datetime.utcnow()),

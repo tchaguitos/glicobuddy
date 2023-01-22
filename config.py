@@ -1,9 +1,23 @@
 import os
+import pathlib
+
+from alembic import config, command
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from libs.orm import metadata
+
+
+def rodar_migrations():
+    root_do_projeto = pathlib.Path(__file__).parent.parent.resolve()
+
+    os.chdir(f"{root_do_projeto}/glicobuddy")
+
+    alembic_cfg = config.Config(f"{root_do_projeto}/glicobuddy/alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", get_postgres_uri())
+
+    command.upgrade(alembic_cfg, "head")
 
 
 def start_mappers():
@@ -20,10 +34,9 @@ def get_session_factory(engine=None, is_test: bool = False):
 
     start_mappers()
 
-    # TODO: ajustar a remoção e criação das tabelas no ambiente de teste
     if is_test is True:
         metadata.drop_all(engine)
-        metadata.create_all(engine)
+        rodar_migrations()
 
     return sessionmaker(
         bind=engine,

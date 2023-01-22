@@ -25,17 +25,26 @@ def upgrade() -> None:
         sa.Column("observacoes", sa.String(255)),
         sa.Column("primeira_do_dia", sa.Boolean()),
         sa.Column("horario_dosagem", sa.DateTime()),
-        sa.Column("criado_por", UUID()),
+        sa.Column("criado_por", sa.ForeignKey("usuario.id", ondelete="CASCADE")),
         sa.Column(
             "data_criacao", sa.DateTime(), server_default=sa.func.current_timestamp()
         ),
-        sa.Column("ultima_vez_editado_por", UUID()),
+        sa.Column(
+            "ultima_vez_editado_por", sa.ForeignKey("usuario.id", ondelete="CASCADE")
+        ),
         sa.Column("data_ultima_edicao", sa.DateTime()),
         sa.Column("ativo", sa.Boolean(), default=True),
         sa.Column("deletado", sa.Boolean(), default=False),
+
         sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(["criado_por"], ["usuario.id"]),
-        sa.ForeignKeyConstraint(["ultima_vez_editado_por"], ["usuario.id"]),
+        sa.ForeignKeyConstraint(("criado_por",), ["usuario.id"]),
+        sa.ForeignKeyConstraint(("ultima_vez_editado_por",), ["usuario.id"]),
+    )
+
+    op.create_index(
+        index_name="idx_glicemia_criado_por",
+        table_name="glicemia",
+        columns=["criado_por"],
     )
 
 

@@ -73,3 +73,5 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("glicemia")
+    op.drop_index("idx_glicemia_criado_por")
+    op.execute("DROP TYPE tipo_de_glicemia")

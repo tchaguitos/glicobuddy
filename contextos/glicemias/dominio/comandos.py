@@ -7,7 +7,10 @@ from libs.ddd import Comando
 from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.tipos_basicos.identificadores_db import IdGlicemia
 
-from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia, TipoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import (
+    TipoDeGlicemia,
+    ValoresParaEdicaoDeGlicemia,
+)
 
 
 @dataclass_validate

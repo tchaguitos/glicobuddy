@@ -65,9 +65,7 @@ def editar_usuario(comando: EditarUsuario, uow: UnidadeDeTrabalhoAbstrata) -> Us
 
     with uow:
         repo_consulta: RepoConsultaUsuarios = uow.repo_consulta
-        usuario: Usuario = repo_consulta.consultar_por_id(
-            id_usuario=comando.usuario_id
-        )
+        usuario: Usuario = repo_consulta.consultar_por_id(id_usuario=comando.usuario_id)
 
         usuario_editado = usuario.editar(valores_para_edicao=comando.novos_valores)
 

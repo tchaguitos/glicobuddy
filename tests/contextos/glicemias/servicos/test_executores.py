@@ -22,7 +22,10 @@ from contextos.glicemias.servicos.executores import (
     editar_glicemia,
     remover_glicemia,
 )
-from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia, TipoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import (
+    TipoDeGlicemia,
+    ValoresParaEdicaoDeGlicemia,
+)
 
 
 class FakeRepo(RepositorioDominio, RepositorioConsulta):

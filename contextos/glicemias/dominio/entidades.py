@@ -7,7 +7,10 @@ from dataclasses import dataclass, asdict, replace, field
 from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
 
-from contextos.glicemias.dominio.objetos_de_valor import TipoDeGlicemia, ValoresParaEdicaoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import (
+    TipoDeGlicemia,
+    ValoresParaEdicaoDeGlicemia,
+)
 
 
 @dataclass_validate

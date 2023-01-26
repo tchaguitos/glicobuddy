@@ -40,9 +40,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("usuario")
     op.drop_constraint(
         type_="unique",
         table_name="usuario",
         constraint_name="constraint_usuario_email",
     )
+    op.drop_table("usuario")

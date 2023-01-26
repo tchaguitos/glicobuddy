@@ -60,8 +60,6 @@ def upgrade() -> None:
         sa.Column("ativo", sa.Boolean(), default=True),
         sa.Column("deletado", sa.Boolean(), default=False),
         sa.PrimaryKeyConstraint("id"),
-        sa.ForeignKeyConstraint(("criado_por",), ["usuario.id"]),
-        sa.ForeignKeyConstraint(("ultima_vez_editado_por",), ["usuario.id"]),
     )
 
     op.create_index(
@@ -72,6 +70,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.drop_index(
+        index_name="idx_glicemia_criado_por",
+        table_name="glicemia",
+    )
     op.drop_table("glicemia")
-    op.drop_index("idx_glicemia_criado_por")
     op.execute("DROP TYPE tipo_de_glicemia")

@@ -3,6 +3,7 @@ from sqlalchemy.orm import composite
 from sqlalchemy.dialects.postgresql import UUID, ENUM
 from sqlalchemy import (
     Table,
+    Index,
     Column,
     String,
     Integer,
@@ -33,6 +34,7 @@ glicemia = Table(
         nullable=True,
     ),
     Column("data_ultima_edicao", DateTime, nullable=True),
+    Index("idx_glicemia_criado_por", "criado_por"),
 )
 
 mapper_glicemia = mapper.map_imperatively(

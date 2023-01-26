@@ -6,6 +6,7 @@ from sqlalchemy import (
     Column,
     String,
     DateTime,
+    UniqueConstraint,
 )
 
 from libs.orm import mapper, metadata
@@ -17,11 +18,12 @@ usuario = Table(
     "usuario",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
-    Column("email", String(155)),
+    Column("email", String(155), unique=True),
     Column("senha", String(255)),
     Column("nome_completo", String(255)),
     Column("data_de_nascimento", Date),
     Column("data_criacao_utc", DateTime, default=datetime.utcnow()),
+    UniqueConstraint("email", name="constraint_usuario_email"),
 )
 
 mapper_usuario = mapper.map_imperatively(

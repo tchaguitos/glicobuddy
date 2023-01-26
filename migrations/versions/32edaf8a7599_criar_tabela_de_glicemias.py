@@ -34,22 +34,26 @@ def upgrade() -> None:
     op.create_table(
         "glicemia",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
-        sa.Column("valor", sa.Integer()),
-        sa.Column("observacoes", sa.String(255)),
+        sa.Column("valor", sa.Integer(), nullable=False),
+        sa.Column("observacoes", sa.String(255), nullable=True),
         sa.Column(
             "tipo",
             tipo_de_glicemia,
             nullable=False,
             default="jejum",
         ),
-        sa.Column("horario_dosagem", sa.DateTime()),
+        sa.Column("horario_dosagem", sa.DateTime(), nullable=False),
         sa.Column(
             "criado_por",
             UUID(as_uuid=True),
             sa.ForeignKey("usuario.id", ondelete="CASCADE"),
+            nullable=False,
         ),
         sa.Column(
-            "data_criacao", sa.DateTime(), server_default=sa.func.current_timestamp()
+            "data_criacao",
+            sa.DateTime(),
+            server_default=sa.func.current_timestamp(),
+            nullable=False,
         ),
         sa.Column(
             "ultima_vez_editado_por",
@@ -57,8 +61,6 @@ def upgrade() -> None:
             sa.ForeignKey("usuario.id", ondelete="CASCADE"),
         ),
         sa.Column("data_ultima_edicao", sa.DateTime()),
-        sa.Column("ativo", sa.Boolean(), default=True),
-        sa.Column("deletado", sa.Boolean(), default=False),
         sa.PrimaryKeyConstraint("id"),
     )
 

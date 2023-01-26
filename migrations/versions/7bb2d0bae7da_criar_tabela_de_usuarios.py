@@ -20,10 +20,10 @@ def upgrade() -> None:
     op.create_table(
         "usuario",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
-        sa.Column("email", sa.String(155)),
-        sa.Column("senha", sa.String(255)),
-        sa.Column("nome_completo", sa.String(255)),
-        sa.Column("data_de_nascimento", sa.Date()),
+        sa.Column("email", sa.String(155), unique=True, nullable=False),
+        sa.Column("senha", sa.String(255), nullable=False),
+        sa.Column("nome_completo", sa.String(255), nullable=False),
+        sa.Column("data_de_nascimento", sa.Date(), nullable=False),
         sa.Column(
             "data_criacao_utc",
             sa.DateTime(),

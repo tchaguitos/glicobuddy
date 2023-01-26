@@ -20,10 +20,10 @@ def upgrade() -> None:
     op.create_table(
         "usuario",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, unique=True),
-        sa.Column("email", sa.String(155)),
-        sa.Column("senha", sa.String(255)),
-        sa.Column("nome_completo", sa.String(255)),
-        sa.Column("data_de_nascimento", sa.Date()),
+        sa.Column("email", sa.String(155), unique=True, nullable=False),
+        sa.Column("senha", sa.String(255), nullable=False),
+        sa.Column("nome_completo", sa.String(255), nullable=False),
+        sa.Column("data_de_nascimento", sa.Date(), nullable=False),
         sa.Column(
             "data_criacao_utc",
             sa.DateTime(),
@@ -40,9 +40,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("usuario")
     op.drop_constraint(
         type_="unique",
         table_name="usuario",
         constraint_name="constraint_usuario_email",
     )
+    op.drop_table("usuario")

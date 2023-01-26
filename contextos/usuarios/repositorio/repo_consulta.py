@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import List
 
 from libs.repositorio import RepositorioConsulta
 
@@ -9,7 +9,7 @@ from contextos.usuarios.dominio.agregados import Usuario
 
 
 class RepoConsultaUsuarios(RepositorioConsulta):
-    def consultar_todos(self) -> Iterator[Usuario]:
+    def consultar_todos(self) -> List[Usuario]:
         return self.session.query(Usuario).all()
 
     def consultar_por_id(self, id_usuario: IdUsuario) -> Usuario:

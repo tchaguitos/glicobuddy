@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Set, Optional
 from freezegun import freeze_time
 
+from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
@@ -21,7 +22,10 @@ from contextos.glicemias.servicos.executores import (
     editar_glicemia,
     remover_glicemia,
 )
-from contextos.glicemias.dominio.objetos_de_valor import ValoresParaEdicaoDeGlicemia
+from contextos.glicemias.dominio.objetos_de_valor import (
+    TipoDeGlicemia,
+    ValoresParaEdicaoDeGlicemia,
+)
 
 
 class FakeRepo(RepositorioDominio, RepositorioConsulta):
@@ -80,10 +84,10 @@ def test_criar_glicemia():
 
     glicemia_criada = criar_glicemia(
         comando=CriarGlicemia(
-            valor=98,
+            valor=ValorDeGlicemia(98),
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
-            primeira_do_dia=True,
+            tipo=TipoDeGlicemia.jejum,
         ),
         uow=uow,
     )
@@ -97,7 +101,7 @@ def test_criar_glicemia():
 
     assert glicemia_criada.id
     assert glicemia_criada.valor == 98
-    assert glicemia_criada.primeira_do_dia is True
+    assert glicemia_criada.tipo == TipoDeGlicemia.jejum
     assert glicemia_criada.horario_dosagem == horario_dosagem
     assert glicemia_criada.observacoes == "glicose em jejum"
     assert glicemia_criada.auditoria.criado_por == uow.usuario
@@ -113,10 +117,10 @@ def test_editar_glicemia():
 
     glicemia_criada = criar_glicemia(
         comando=CriarGlicemia(
-            valor=105,
+            valor=ValorDeGlicemia(105),
             horario_dosagem=horario_dosagem,
             observacoes="glicose em jejum",
-            primeira_do_dia=True,
+            tipo=TipoDeGlicemia.jejum,
         ),
         uow=uow,
     )
@@ -138,8 +142,8 @@ def test_editar_glicemia():
             comando=EditarGlicemia(
                 glicemia_id=IdGlicemia(glicemia_criada.id),
                 novos_valores=ValoresParaEdicaoDeGlicemia(
-                    valor=98,
-                    primeira_do_dia=True,
+                    valor=ValorDeGlicemia(98),
+                    tipo=TipoDeGlicemia.jejum,
                     horario_dosagem=horario_dosagem,
                     observacoes="teste mano afff",
                 ),
@@ -168,10 +172,10 @@ def test_remover_glicemia():
 
     glicemia_criada = criar_glicemia(
         comando=CriarGlicemia(
-            valor=98,
+            valor=ValorDeGlicemia(98),
             horario_dosagem=datetime(2021, 8, 27, 10, 15),
             observacoes="glicose em jejum",
-            primeira_do_dia=False,
+            tipo=TipoDeGlicemia.pre_prandial,
         ),
         uow=uow,
     )

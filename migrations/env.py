@@ -1,7 +1,7 @@
 from logging.config import fileConfig
 
 from sqlalchemy import pool
-from sqlalchemy import engine_from_config, pool, MetaData
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
@@ -20,10 +20,7 @@ if config.config_file_name is not None:
 
 config.set_main_option("sqlalchemy.url", get_postgres_uri())
 
-meta = metadata
-meta_schemax = MetaData()
-
-target_metadata = meta_schemax
+target_metadata = metadata
 
 
 def run_migrations_offline() -> None:

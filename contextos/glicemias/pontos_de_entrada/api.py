@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 
 from libs.unidade_de_trabalho import UnidadeDeTrabalho
-from libs.tipos_basicos.identificadores_db import IdUsuario, IdGlicemia
+from libs.tipos_basicos.numeros import ValorDeGlicemia
+from libs.tipos_basicos.identificadores_db import IdGlicemia
 from libs.pontos_de_entrada import retornar_usuario_logado
 
 from contextos.glicemias.dominio.comandos import (
@@ -53,9 +54,9 @@ def listar_glicemias(
         glicemias=[
             SerializadorDeGlicemia(
                 id=glicemia.id,
+                tipo=glicemia.tipo,
                 valor=glicemia.valor,
                 observacoes=glicemia.observacoes,
-                primeira_do_dia=glicemia.primeira_do_dia,
                 horario_dosagem=glicemia.horario_dosagem,
             )
             for glicemia in glicemias
@@ -88,9 +89,9 @@ def consultar_glicemias_por_id(
         glicemias=[
             SerializadorDeGlicemia(
                 id=IdGlicemia(glicemia.id),
+                tipo=glicemia.tipo,
                 valor=glicemia.valor,
                 observacoes=glicemia.observacoes,
-                primeira_do_dia=glicemia.primeira_do_dia,
                 horario_dosagem=glicemia.horario_dosagem,
             )
         ]
@@ -114,9 +115,9 @@ def cadastrar_glicemia(
     try:
         glicemia_criada = bus.tratar_mensagem(
             mensagem=CriarGlicemia(
-                valor=nova_glicemia.valor,
+                tipo=nova_glicemia.tipo,
+                valor=ValorDeGlicemia(nova_glicemia.valor),
                 observacoes=nova_glicemia.observacoes,
-                primeira_do_dia=nova_glicemia.primeira_do_dia,
                 horario_dosagem=nova_glicemia.horario_dosagem,
             ),
         )
@@ -147,9 +148,9 @@ def atualizar_glicemia(
             mensagem=EditarGlicemia(
                 glicemia_id=IdGlicemia(glicemia_id),
                 novos_valores=ValoresParaEdicaoDeGlicemia(
-                    valor=novos_valores.valor,
+                    tipo=novos_valores.tipo,
+                    valor=ValorDeGlicemia(novos_valores.valor),
                     observacoes=novos_valores.observacoes,
-                    primeira_do_dia=novos_valores.primeira_do_dia,
                     horario_dosagem=novos_valores.horario_dosagem,
                 ),
             ),

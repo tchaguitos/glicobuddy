@@ -1,7 +1,6 @@
 import pytest
 
 from config import get_session_factory
-
 from tests.contextos.usuarios.mock import *
 
 

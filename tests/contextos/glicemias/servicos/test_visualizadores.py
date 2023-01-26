@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 from typing import Set, Optional
 from freezegun import freeze_time
 
+from libs.tipos_basicos.numeros import ValorDeGlicemia
 from libs.unidade_de_trabalho import UnidadeDeTrabalhoAbstrata
 from libs.repositorio import RepositorioDominio, RepositorioConsulta
 from libs.tipos_basicos.identificadores_db import IdUsuario
 
-from contextos.glicemias.dominio.entidades import Glicemia
-
-from contextos.glicemias.dominio.entidades import Auditoria, Glicemia
+from contextos.glicemias.dominio.entidades import Glicemia, Auditoria
+from contextos.glicemias.dominio.objetos_de_valor import TipoDeGlicemia
 from contextos.glicemias.servicos.visualizadores import (
     consultar_glicemias,
     consultar_glicemia_por_id,
@@ -37,6 +37,13 @@ class FakeRepo(RepositorioDominio, RepositorioConsulta):
 
     def consultar_todos(self):
         yield from self.__glicemias
+
+    def consultar_por_usuario(self, id_usuario: IdUsuario):
+        return [
+            glicemia
+            for glicemia in self.__glicemias
+            if glicemia.auditoria.criado_por == id_usuario
+        ]
 
     def consultar_por_id(self, id: UUID):
         return next(
@@ -65,8 +72,8 @@ class FakeUOW(UnidadeDeTrabalhoAbstrata):
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
 def test_consultar_glicemias():
-    uow = FakeUOW(usuario=IdUsuario())
-    usuario_id = uuid4()
+    usuario_id = IdUsuario(uuid4())
+    uow = FakeUOW(usuario=usuario_id)
 
     horario_dosagem_1 = datetime(2021, 8, 27, 10, 15)
     horario_dosagem_2 = horario_dosagem_1 + timedelta(hours=2)
@@ -74,31 +81,27 @@ def test_consultar_glicemias():
 
     glicemias_esperadas = [
         Glicemia(
-            valor=103,
-            primeira_do_dia=True,
+            valor=ValorDeGlicemia(103),
+            tipo=TipoDeGlicemia.pre_prandial,
             horario_dosagem=horario_dosagem_1,
             observacoes="glicose em jejum",
             auditoria=Auditoria(
-                criado_por=IdUsuario(usuario_id),
+                criado_por=usuario_id,
                 data_criacao=datetime.now(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         ),
         Glicemia(
-            valor=98,
-            primeira_do_dia=False,
+            valor=ValorDeGlicemia(98),
+            tipo=TipoDeGlicemia.pre_prandial,
             horario_dosagem=horario_dosagem_2,
             observacoes="depois do café da manhã",
             auditoria=Auditoria(
-                criado_por=IdUsuario(usuario_id),
+                criado_por=usuario_id,
                 data_criacao=datetime.now() + timedelta(hours=2),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         ),
     ]
@@ -114,17 +117,15 @@ def test_consultar_glicemias():
     assert glicemias_esperadas[1] in glicemias
 
     nova_glicemia = Glicemia(
-        valor=115,
-        primeira_do_dia=False,
+        valor=ValorDeGlicemia(115),
+        tipo=TipoDeGlicemia.pre_prandial,
         horario_dosagem=horario_dosagem_3,
         observacoes="pré almoço",
         auditoria=Auditoria(
-            criado_por=IdUsuario(usuario_id),
+            criado_por=usuario_id,
             data_criacao=datetime.now() + timedelta(hours=4),
             ultima_vez_editado_por=None,
             data_ultima_edicao=None,
-            ativo=True,
-            deletado=False,
         ),
     )
     uow.repo_dominio.adicionar(nova_glicemia)
@@ -132,8 +133,24 @@ def test_consultar_glicemias():
     glicemias = list(consultar_glicemias(uow=uow))
 
     assert len(glicemias) == 3
-
     assert nova_glicemia in glicemias
+
+    glicemia_de_outro_usuario = Glicemia(
+        valor=ValorDeGlicemia(119),
+        tipo=TipoDeGlicemia.pre_prandial,
+        horario_dosagem=horario_dosagem_3,
+        observacoes="pré almoço",
+        auditoria=Auditoria(
+            criado_por=IdUsuario(uuid4()),  # outro usuario. nao deve ser retornada
+            data_criacao=datetime.now() + timedelta(hours=4),
+            ultima_vez_editado_por=None,
+            data_ultima_edicao=None,
+        ),
+    )
+    uow.repo_dominio.adicionar(glicemia_de_outro_usuario)
+
+    assert len(glicemias) == 3
+    assert glicemia_de_outro_usuario not in glicemias
 
 
 @freeze_time(datetime(2021, 8, 27, 16, 20))
@@ -147,8 +164,8 @@ def test_consultar_glicemia_por_id():
 
     glicemias_esperadas = [
         Glicemia(
-            valor=103,
-            primeira_do_dia=True,
+            valor=ValorDeGlicemia(103),
+            tipo=TipoDeGlicemia.pre_prandial,
             horario_dosagem=horario_dosagem_1,
             observacoes="glicose em jejum",
             auditoria=Auditoria(
@@ -156,13 +173,11 @@ def test_consultar_glicemia_por_id():
                 data_criacao=datetime.now(),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         ),
         Glicemia(
-            valor=98,
-            primeira_do_dia=False,
+            valor=ValorDeGlicemia(98),
+            tipo=TipoDeGlicemia.pre_prandial,
             horario_dosagem=horario_dosagem_2,
             observacoes="depois do café da manhã",
             auditoria=Auditoria(
@@ -170,13 +185,11 @@ def test_consultar_glicemia_por_id():
                 data_criacao=datetime.now() + timedelta(hours=2),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         ),
         Glicemia(
-            valor=115,
-            primeira_do_dia=False,
+            valor=ValorDeGlicemia(115),
+            tipo=TipoDeGlicemia.pos_prandial,
             horario_dosagem=horario_dosagem_3,
             observacoes="pré almoço",
             auditoria=Auditoria(
@@ -184,8 +197,6 @@ def test_consultar_glicemia_por_id():
                 data_criacao=datetime.now() + timedelta(hours=4),
                 ultima_vez_editado_por=None,
                 data_ultima_edicao=None,
-                ativo=True,
-                deletado=False,
             ),
         ),
     ]

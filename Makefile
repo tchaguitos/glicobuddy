@@ -1,3 +1,7 @@
+env-init:
+	docker rm glicotest
+	docker-compose up
+
 run:
 	uvicorn main:app --reload
 
